@@ -2,8 +2,7 @@ package Proy;
 
 import parserjj.*;
 
-
-import java.io.*;
+import java.io.IOException;
 
 public class TestLexico {
     public static void main(String[] args) {
@@ -13,9 +12,11 @@ public class TestLexico {
 
             do {
                 lexer.getNextToken();
-                String currentToken = lexer.getCurrentToken();
-                String currentLexeme = lexer.getCurrentLexeme();
-                System.out.println("Token: " + currentToken + " | Lexema: " + currentLexeme);
+                Token currentToken = lexer.getCurrentToken();
+                if (currentToken != null) {
+                    String currentLexeme = lexer.getCurrentLexeme();
+                    System.out.println("Token: " + currentToken.kind + " | Lexema: " + currentLexeme);
+                }
             } while (lexer.getCurrentToken() != null);
 
             lexer.close();

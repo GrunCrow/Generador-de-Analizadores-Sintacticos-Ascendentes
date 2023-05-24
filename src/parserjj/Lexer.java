@@ -11,9 +11,9 @@ public class Lexer {
     private String currentLine;
     private int currentLineIndex;
     private int currentColumnIndex;
-    private String currentToken;
+    private Token currentToken;
     private String currentLexeme;
-    private Map<String, String> tokenMap;
+    private Map<String, TokenKind> tokenMap;
 
     public Lexer(String filePath) throws IOException {
         reader = new BufferedReader(new FileReader(filePath));
@@ -23,13 +23,13 @@ public class Lexer {
         currentToken = null;
         currentLexeme = null;
         tokenMap = new HashMap<>();
-        tokenMap.put("blanco", "BLANCO");
-        tokenMap.put("comentario", "COMENTARIO");
-        tokenMap.put("NOTERMINAL", "NOTERMINAL");
-        tokenMap.put("TERMINAL", "TERMINAL");
-        tokenMap.put("EQ", "EQ");
-        tokenMap.put("BAR", "BAR");
-        tokenMap.put("SEMICOLON", "SEMICOLON");
+        tokenMap.put("blanco", TokenKind.BLANCO);
+        tokenMap.put("comentario", TokenKind.COMENTARIO);
+        tokenMap.put("NOTERMINAL", TokenKind.NOTERMINAL);
+        tokenMap.put("TERMINAL", TokenKind.TERMINAL);
+        tokenMap.put("EQ", TokenKind.EQ);
+        tokenMap.put("BAR", TokenKind.BAR);
+        tokenMap.put("SEMICOLON", TokenKind.SEMICOLON);
     }
 
     public void getNextToken() throws IOException {
@@ -54,7 +54,7 @@ public class Lexer {
         if (currentChar == '/') {
             if (currentLineIndex + 1 < currentLine.length() && currentLine.charAt(currentLineIndex + 1) == '*') {
                 parseComment();
-                getNextToken();
+                currentToken = Token.newToken(TokenKind.COMENTARIO, currentLexeme);
                 return;
             }
         }
@@ -65,28 +65,29 @@ public class Lexer {
             parseNonTerminal();
         } else if (currentChar == ':') {
             if (currentLineIndex + 2 < currentLine.length() && currentLine.substring(currentLineIndex, currentLineIndex + 3).equals("::=")) {
-                currentToken = "EQ";
                 currentLexeme = "::=";
+            	currentToken = Token.newToken(TokenKind.EQ, currentLexeme);
                 currentLineIndex += 2;
                 currentColumnIndex += 2;
             } else {
-                currentToken = "UNKNOWN";
-                currentLexeme = String.valueOf(currentChar);
+            	currentLexeme = String.valueOf(currentChar);
+                currentToken = Token.newToken(TokenKind.UNKNOWN, currentLexeme);
             }
         } else if (currentChar == '|') {
-            currentToken = "BAR";
-            currentLexeme = String.valueOf(currentChar);
+        	currentLexeme = String.valueOf(currentChar);
+            currentToken = Token.newToken(TokenKind.BAR, currentLexeme);
         } else if (currentChar == ';') {
-            currentToken = "SEMICOLON";
-            currentLexeme = String.valueOf(currentChar);
+        	currentLexeme = String.valueOf(currentChar);
+            currentToken = Token.newToken(TokenKind.SEMICOLON, currentLexeme);
         } else {
-            currentToken = "UNKNOWN";
-            currentLexeme = String.valueOf(currentChar);
+        	currentLexeme = String.valueOf(currentChar);
+            currentToken = Token.newToken(TokenKind.UNKNOWN, currentLexeme);
         }
 
         currentLineIndex++;
         currentColumnIndex++;
     }
+
 
     private void parseComment() {
         StringBuilder sb = new StringBuilder();
@@ -113,7 +114,6 @@ public class Lexer {
             currentColumnIndex++;
         }
 
-        currentToken = "COMENTARIO";
         currentLexeme = sb.toString();
     }
 
@@ -131,8 +131,9 @@ public class Lexer {
             currentColumnIndex++;
         }
 
-        currentToken = "NOTERMINAL";
         currentLexeme = sb.toString();
+        
+        currentToken = Token.newToken(TokenKind.NOTERMINAL, String.valueOf(currentLexeme));
     }
 
     private void parseTerminal() {
@@ -154,8 +155,9 @@ public class Lexer {
             currentColumnIndex++;
         }
 
-        currentToken = "TERMINAL";
         currentLexeme = sb.toString();
+        
+        currentToken = Token.newToken(TokenKind.TERMINAL, String.valueOf(currentLexeme));
     }
 
     private void skipWhitespace() {
@@ -167,7 +169,7 @@ public class Lexer {
         }
     }
 
-    public String getCurrentToken() {
+    public Token getCurrentToken() {
         return currentToken;
     }
 
@@ -183,3 +185,4 @@ public class Lexer {
         }
     }
 }
+

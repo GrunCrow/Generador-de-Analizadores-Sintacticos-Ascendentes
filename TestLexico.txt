@@ -3,3 +3,4 @@
 <term> ::= <factor> "*" <term> | <factor>
 <factor> ::= "(" <expr> ")" | <num>
 <num> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+<num> ::= A | a | b | _ | cd | _5 | as6 | fas7a | 832 | _9aBa_
