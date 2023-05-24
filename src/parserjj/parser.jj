@@ -1,22 +1,20 @@
 options {
-  STATIC=false;
+  STATIC = false;
 }
 
 PARSER_BEGIN(ProyectoParser)
 
-
 package parserjj;
 
 public class ProyectoParser {
-	
+
 }
 
 PARSER_END(ProyectoParser)
 
-
 /* WHITE SPACE */
 
-SKIP :
+SKIP:
 {
   " "
 | "\t"
@@ -26,60 +24,44 @@ SKIP :
 
 /* COMMENTS */
 
-SKIP :
+SKIP:
 {
-  <MULTI_LINE_COMMENT: "/*" ( ("*")* ~["*","/"] | "/" )* ("*")+ "/" >
+  <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/" >
 }
 
-
-TOKEN :
+TOKEN:
 {
-  < BAR: "|" >
-| < SEMICOLON: ";" >
-| < EQ: "::=" >
-| < NOTERMINAL: ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","0"-"9","_"] )* >
-| < TERMINAL: "<" ["a"-"z","A"-"Z","_"] ( ["a"-"z","A"-"Z","0"-"9","_"] )* ">" >
+  <BAR: "|" >
+| <SEMICOLON: ";" >
+| <EQ: "::=" >
+| <NOTERMINAL: ["a"-"z","A"-"Z","_"] (["a"-"z","A"-"Z","0"-"9","_"])* >
+| <TERMINAL: "<" ["a"-"z","A"-"Z","_"] (["a"-"z","A"-"Z","0"-"9","_"])* ">" >
 }
 
-//Analisis sintactio sintactico descendente
+// Análisis sintáctico ascendente
 
-/**
-* Reconoce el contenido completo de un archivo Proyecto
-*
-* Gramatica ::= ( Definicion )*
-*/
+
+// Punto de entrada
 void Gramatica():
 {}
 {
-	( Definicion() )*
+  (Definicion())*
 }
 
-/**
-* Definicion ::= NOTERMINAL EQ ListaReglas SEMICOLON
-*/
 void Definicion():
 {}
 {
-	<NOTERMINAL> <EQ> ListaReglas() <SEMICOLON>  
+  <NOTERMINAL> <EQ> ListaReglas() <SEMICOLON>
 }
 
-/**
-* ListaReglas ::= Regla (BAR Regla)*
-*/
 void ListaReglas():
 {}
 {
-	Regla() ( <BAR> Regla() )*
+  Regla() ( <BAR> Regla() )*
 }
 
-/**
-* Regla ::= (NOTERMINAL | TERMINAL)*
-*/
 void Regla():
 {}
 {
-	( <NOTERMINAL> | <TERMINAL> )*	  
+  ( <NOTERMINAL> | <TERMINAL> )*
 }
-
-	   
-  
