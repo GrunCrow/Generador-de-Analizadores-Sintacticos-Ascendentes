@@ -56,7 +56,7 @@ package parserjj;
  * 
  * @author Francisco José Moreno Velo
  */
-public class SintaxException extends Exception implements TokenConstants{
+public class SintaxException extends Exception implements TokenConstants_Proyecto{
 
 	/**
 	 * Constante asignada al objeto serializable

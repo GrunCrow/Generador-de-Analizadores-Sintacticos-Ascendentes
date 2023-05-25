@@ -6,7 +6,7 @@ package parserjj;
 * * @author Francisco Jos� Moreno Velo
 *
 */
-public interface TokenConstants {
+public interface TokenConstants_Proyecto {
 
 	/**
 	* Final de fichero
