@@ -56,7 +56,7 @@ package parserjj;
  * 
  * @author Francisco José Moreno Velo
  */
-public class SintaxException extends Exception implements TokenConstants {
+public class SintaxException extends Exception implements TokenConstants{
 
 	/**
 	 * Constante asignada al objeto serializable
@@ -86,8 +86,7 @@ public class SintaxException extends Exception implements TokenConstants {
 	 * @param token
 	 * @param expected
 	 */
-	public SntaxException(Token token, int[] expected) 
-	{
+	public SintaxException(Token token, int[] expected) {
 		this.msg = "Sintax exception at row "+token.getRow();
 		msg += ", column "+token.getColumn()+".\n";
 		
@@ -95,7 +94,7 @@ public class SintaxException extends Exception implements TokenConstants {
 		msg += "  while expecting one of\n";
 		for(int i=0; i<expected.length; i++) 
 		{
-			msg += "    "+getLexemeForKind(expected[i])+"\n";
+			msg += "    "+ getLexemeForKind(expected[i]) +"\n";
 		}
 	}
 	
@@ -112,10 +111,9 @@ public class SintaxException extends Exception implements TokenConstants {
 	 * @param kind
 	 * @return
 	 */
-	private String getLexemeForKind(String kind) 
+	private String getLexemeForKind(int kind) 
 	{
-		switch(kind) 
-		{
+		switch(kind){
 			case BOOLEAN: return "boolean";
 			case CHAR:  return "char";
 			case ELSE:  return "else";
