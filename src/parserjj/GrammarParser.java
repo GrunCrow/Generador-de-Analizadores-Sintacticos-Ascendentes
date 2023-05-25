@@ -11,6 +11,10 @@ public class GrammarParser {
     private List<String> nonTerminals;
     private List<String> terminals;
     private List<ProductionRule> productionRules;
+    
+    ActionElement[][] actionTable;
+    int[][] gotoTable;
+    int[][] rules;
 
     public GrammarParser() {
         nonTerminalsMap = new HashMap<>();
@@ -50,7 +54,6 @@ public class GrammarParser {
                 System.out.println("Error en la línea " + lineNumber + ": " + line);
                 e.printStackTrace();
             }
-            lineNumber++; // Incrementar el contador de línea
         }
         reader.close();
     }
@@ -163,4 +166,30 @@ public class GrammarParser {
     public List<ProductionRule> getProductionRules() {
         return productionRules;
     }
+
+	public ActionElement[][] getActionTable() {
+		return actionTable;
+	}
+
+	public void setActionTable(ActionElement[][] actionTable) {
+		this.actionTable = actionTable;
+	}
+
+	public int[][] getGotoTable() {
+		return gotoTable;
+	}
+
+	public void setGotoTable(int[][] gotoTable) {
+		this.gotoTable = gotoTable;
+	}
+
+	public int[][] getRules() {
+		return rules;
+	}
+
+	public void setRules(int[][] rules) {
+		this.rules = rules;
+	}
+    
+    
 }
