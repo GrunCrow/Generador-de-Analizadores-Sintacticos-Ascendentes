@@ -1,7 +1,5 @@
 public interface TokenConstants {
-
     public int EOF = 0;
-
     public int <PLUS> = 1;
     public int <MINUS> = 2;
     public int <PROD> = 3;
