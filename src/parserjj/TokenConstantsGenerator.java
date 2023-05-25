@@ -12,6 +12,8 @@ public class TokenConstantsGenerator {
 
     public static void generateTokenConstants(List<Token> tokens, String outputFilePath) {
         try (FileWriter writer = new FileWriter(outputFilePath)) {
+        	
+        	writer.write("package generated; \n\n");
             writer.write("public interface TokenConstants {\n");
             //writer.write("\n");
 
@@ -35,7 +37,8 @@ public class TokenConstantsGenerator {
                 if (token.getKind() == TokenKind.TERMINAL && !terminalLexemes.contains(token.getValue().toString())) {
                     String lexeme = token.getValue().toString();
                     terminalLexemes.add(lexeme);
-                    writer.write("    public int " + lexeme + " = " + terminalTokenIndex + ";\n");
+                    String extractedWord = lexeme.substring(1, lexeme.length() - 1); // para quitar < y >
+                    writer.write("    public int " + extractedWord + " = " + terminalTokenIndex + ";\n");
                     terminalTokenIndex++;
                 }
             }

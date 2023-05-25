@@ -12,6 +12,7 @@ public class SymbolConstantsGenerator {
 
     public static void generateSymbolConstants(List<Token> tokens, String outputFilePath) {
         try (FileWriter writer = new FileWriter(outputFilePath)) {
+        	writer.write("package generated; \n\n");
             writer.write("public interface SymbolConstants {\n");
             //writer.write("\n");
 

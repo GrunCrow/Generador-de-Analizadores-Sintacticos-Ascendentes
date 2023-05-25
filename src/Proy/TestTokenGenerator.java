@@ -13,7 +13,7 @@ public class TestTokenGenerator {
             List<Token> tokens = lexer.tokenize();
             lexer.close();
 
-            TokenConstantsGenerator.generateTokenConstants(tokens, "TokenConstants.java");
+            TokenConstantsGenerator.generateTokenConstants(tokens, "src/generated/TokenConstants.java");
         } catch (IOException e) {
             e.printStackTrace();
         }

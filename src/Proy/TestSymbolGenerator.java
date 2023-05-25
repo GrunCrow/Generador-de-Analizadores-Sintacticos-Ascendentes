@@ -13,7 +13,7 @@ public class TestSymbolGenerator {
             List<Token> tokens = lexer.tokenize();
             lexer.close();
 
-            SymbolConstantsGenerator.generateSymbolConstants(tokens, "SymbolConstants.java");
+            SymbolConstantsGenerator.generateSymbolConstants(tokens, "src/generated/SymbolConstants.java");
         } catch (IOException e) {
             e.printStackTrace();
         }

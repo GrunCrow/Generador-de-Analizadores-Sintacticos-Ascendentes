@@ -1,4 +1,3 @@
-//------------------------------------------------------------------//
 //                        COPYRIGHT NOTICE                          //
 //------------------------------------------------------------------//
 // Copyright (c) 2017, Francisco José Moreno Velo                   //
@@ -41,7 +40,7 @@
 //           Departamento de Tecnologías de la Información          //
 //   Área de Ciencias de la Computación e Inteligencia Artificial   //
 //------------------------------------------------------------------//
-//                     PROCESADORES DE LENGUAJES                     //
+//                     PROCESADORES DE LENGUAJE                     //
 //------------------------------------------------------------------//
 //                                                                  //
 //                  Compilador del lenguaje Tinto                   //
@@ -50,130 +49,113 @@
 
 package parserjj;
 
-import java.util.Stack;
+//import generated.*;
 
 /**
- * Clase que desarrolla el comportamiento común de los analizadores
- * sintácticos ascendentes basados en tablas SLR
+ * Clase que describe un excepción sintáctica
  * 
  * @author Francisco José Moreno Velo
- *
  */
-public abstract class SLRParser {
+public class SintaxException extends Exception implements TokenConstants {
 
 	/**
-	 * Analizador léxico
+	 * Constante asignada al objeto serializable
 	 */
-	private Lexer lexer;
+	private static final long serialVersionUID = 20080002L;
+
+	/**
+	 * Mensaje de error
+	 */
+	private String msg;
 	
 	/**
-	 * Siguiente token de la cadena de entrada
+	 * Constructor con un solo tipo esperado
+	 * @param token
+	 * @param expected
 	 */
-	private Token nextToken;
+	public SintaxException(Token token, int expected) 
+	{
+		this.msg = "Sintax exception at row "+token.getRow();
+		msg += ", column "+token.getColumn()+".\n";
+		msg += "  Found "+token.getValue()+"\n";
+		msg += "  while expecting "+getLexemeForKind(expected)+".\n";
+	}
 	
 	/**
-	 * Pila de estados
+	 * Constructor con una lista de tipos esperados
+	 * @param token
+	 * @param expected
 	 */
-	private Stack<Integer> stack;
+	public SntaxException(Token token, int[] expected) 
+	{
+		this.msg = "Sintax exception at row "+token.getRow();
+		msg += ", column "+token.getColumn()+".\n";
+		
+		msg += "  Found "+token.getValue()+"\n";
+		msg += "  while expecting one of\n";
+		for(int i=0; i<expected.length; i++) 
+		{
+			msg += "    "+getLexemeForKind(expected[i])+"\n";
+		}
+	}
 	
 	/**
-	 * Tabla de acciones
+	 * Obtiene el mensaje de error
 	 */
-	protected ActionElement[][] actionTable;
+	public String toString() 
+	{
+		return this.msg;
+	}
 	
 	/**
-	 * Tabla de Ir_a
-	 */
-	protected int[][] gotoTable;
-	
-	/**
-	 * Lista de reglas
-	 */
-	protected int[][] rule;
-	
-	/**
-	 * Realiza el análisis sintáctico a partir del léxico
-	 * @param filename
+	 * Descripción del token
+	 * @param kind
 	 * @return
 	 */
-	protected boolean parse(Lexer lexer) throws SintaxException
+	private String getLexemeForKind(String kind) 
 	{
-		this.lexer = lexer;
-		this.nextToken = lexer.getNextToken();
-		this.stack = new Stack<Integer>();
-		this.stack.push(new Integer(0));
-		while(true) 
+		switch(kind) 
 		{
-			if(step()) break;
+			case BOOLEAN: return "boolean";
+			case CHAR:  return "char";
+			case ELSE:  return "else";
+			case FALSE: return "false";
+			case IF: return "if";
+			case IMPORT: return "import";
+			case INT: return "int";
+			case LIBRARY: return "library";
+			case PRIVATE: return "private";
+			case PUBLIC: return "public";
+			case RETURN: return "return";
+			case TRUE: return "true";
+			case VOID: return "void";
+			case WHILE: return "while";
+			case IDENTIFIER: return "IDENTIFIER";
+			case INTEGER_LITERAL: return "INTEGER_LITERAL";
+			case CHAR_LITERAL: return "CHAR_LITERAL";
+			case LPAREN: return "(";
+			case RPAREN: return ")";
+			case LBRACE: return "{";
+			case RBRACE: return "}";
+			case SEMICOLON: return ";";
+			case COMMA: return "COMMA";
+			case DOT: return "DOT";
+			case ASSIGN: return "=";
+			case EQ: return "==";
+			case LE: return "<=";
+			case LT: return "<";
+			case GE: return ">=";
+			case GT: return ">";
+			case NE: return "!=";
+			case OR: return "||";
+			case AND: return "&&";
+			case NOT: return "!";
+			case PLUS: return "+";
+			case MINUS: return "-";
+			case PROD: return "*";
+			case DIV: return "/";
+			case MOD: return "%";
+			default: return "";
 		}
-		return true;
-	}
-	
-	/**
-	 * Método que realiza una acción de desplazamiento
-	 * @param action
-	 */
-	private void shiftAction(ActionElement action) 
-	{
-		nextToken = lexer.getNextToken();
-		stack.add(new Integer(action.getValue()));
-	}
-	
-	/**
-	 * Método que realiza una acción de reducción
-	 * @param action
-	 */
-	private void reduceAction(ActionElement action) 
-	{
-		int ruleIndex = action.getValue();
-		int numSymbols = rule[ruleIndex][1];
-		int leftSymbol = rule[ruleIndex][0];
-		while(numSymbols > 0) 
-		{
-			stack.pop();
-			numSymbols --;
-		}
-		int state = ((Integer) stack.lastElement()).intValue();
-		int gotoState = gotoTable[state][leftSymbol];
-		stack.push(new Integer(gotoState));
-	}
-	
-	/**
-	 * Ejecuta un paso en el análisis sintáctico, es decir, extrae
-	 * un elemento de la pila y lo analiza.
-	 * @throws SintaxException
-	 */
-	private boolean step() throws SintaxException 
-	{
-		int state = ((Integer) stack.lastElement()).intValue();
-		ActionElement action = actionTable[state][nextToken.getKind()];
-		if(action == null) 
-		{
-			int count = 0;
-			for(int i=0; i<actionTable[state].length; i++) if(actionTable[state][i] != null) count++;
-			int[] expected = new int[count];
-			for(int i=0,j=0; i<actionTable[state].length; i++) if(actionTable[state][i] != null) 
-			{
-				expected[j] = i;
-				j++;
-			}
-			throw new SintaxException(nextToken,expected);
-		}
-		int actionType = action.getType();
-		if(actionType == ActionElement.ACCEPT) 
-		{
-			return true;
-		} 
-		else if(actionType == ActionElement.SHIFT) 
-		{
-			shiftAction(action);
-			return false;
-		} 
-		else if(actionType == ActionElement.REDUCE) 
-		{
-			reduceAction(action);
-			return false;
-		}
-		return false;
 	}
 }

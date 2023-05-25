@@ -42,4 +42,12 @@ public class Token implements java.io.Serializable {
     public static Token newToken(TokenKind kind) {
         return newToken(kind, null);
     }
+
+	public int getRow() {
+		return beginLine;
+	}
+
+	public int getColumn() {
+		return beginColumn;
+	}
 }
