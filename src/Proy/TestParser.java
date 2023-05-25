@@ -1,6 +1,6 @@
-package parserjj;
+package Proy;
 
-import java.io.IOException;
+import parserjj.*;
 
 public class TestParser {
     public static void main(String[] args) {

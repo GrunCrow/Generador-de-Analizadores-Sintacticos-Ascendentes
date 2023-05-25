@@ -38,11 +38,11 @@ public class Parser {
             match(TokenKind.SEMICOLON);
         } else if (currentToken.kind == TokenKind.COMENTARIO) {
             parseComment();
-        }else {
+        } else {
             reportError("Se esperaba un símbolo no terminal");
         }
     }
-    
+
     private void parseComment() {
         // Ignorar el comentario y obtener el siguiente token
         getNextToken();

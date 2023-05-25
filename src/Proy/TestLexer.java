@@ -4,15 +4,15 @@ import parserjj.*;
 
 import java.io.IOException;
 
-public class TestLexico {
+public class TestLexer {
     public static void main(String[] args) {
         try {
-            Lexer lexer = new Lexer("TestLexico.txt");
-            Token token;
+            Lexer lexer = new Lexer("TestLexer.txt");
+            Token currentToken;
 
             do {
                 lexer.getNextToken();
-                Token currentToken = lexer.getCurrentToken();
+                currentToken = lexer.getCurrentToken();
                 if (currentToken != null) {
                     String currentLexeme = lexer.getCurrentLexeme();
                     System.out.println("Token: " + currentToken.kind + " | Lexema: " + currentLexeme);

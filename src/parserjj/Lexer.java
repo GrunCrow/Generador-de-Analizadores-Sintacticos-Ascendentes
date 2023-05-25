@@ -3,7 +3,9 @@ package parserjj;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Lexer {
@@ -175,6 +177,18 @@ public class Lexer {
 
     public String getCurrentLexeme() {
         return currentLexeme;
+    }
+    
+    public List<Token> tokenize() throws IOException {
+        List<Token> tokens = new ArrayList<>();
+
+        getNextToken();
+        while (currentToken != null) {
+            tokens.add(currentToken);
+            getNextToken();
+        }
+
+        return tokens;
     }
 
     public void close() {
