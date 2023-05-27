@@ -6,8 +6,8 @@ import java.io.IOException;
 public class ParserGenerator {
 
     public static void generateParser(String grammar, String outputFilePath) {
-        GrammarParser parser = new GrammarParser();
-        Grammar grammarObj = parser.parse(grammar);
+        GrammarParser parser = new GrammarParser(grammar);
+        Grammar grammarObj = parser.parse();
 
         try (FileWriter writer = new FileWriter(outputFilePath)) {
             writer.write("import generated.*;\n\n");

@@ -43,10 +43,30 @@ public class Compiler {
 	            e.printStackTrace();
 	        }
 			// Comprueba que la sintaxis sea correcta
-			ParserGrammar parser = new ParserGrammar(filepath);
+			GrammarParser parser = new GrammarParser(filepath);
 			parser.parse();
 			parser.close();
 			System.out.println("Parsing completado correctamente.");
+			
+			// SLR PARSER
+			/*
+			public class MySLRParser extends SLRParser {
+			    // Implementación específica de tu gramática y tablas SLR
+			    // ...
+			}
+			
+			try {
+				Lexer lexer = new Lexer(filepath);
+	            MySLRParser parser = new MySLRParser();
+	            parser.parse(lexer);
+	            lexer.close();
+	            // Continúa con la lógica después del análisis sintáctico
+	        } catch (SyntaxException | IOException e) {
+	            // Manejo de excepciones
+	        }
+			 * 
+			 * */
+			
 			
 			// Crea analizador sintáctico
 			Parser parser = new Parser();
