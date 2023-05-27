@@ -77,7 +77,7 @@ public class SintaxException extends Exception implements TokenConstants_Proyect
 	{
 		this.msg = "Sintax exception at row "+token.getRow();
 		msg += ", column "+token.getColumn()+".\n";
-		msg += "  Found "+token.getValue()+"\n";
+		msg += "  Found "+token.getLexeme()+"\n";
 		msg += "  while expecting "+getLexemeForKind(expected)+".\n";
 	}
 	
@@ -90,7 +90,7 @@ public class SintaxException extends Exception implements TokenConstants_Proyect
 		this.msg = "Sintax exception at row "+token.getRow();
 		msg += ", column "+token.getColumn()+".\n";
 		
-		msg += "  Found "+token.getValue()+"\n";
+		msg += "  Found "+token.getLexeme()+"\n";
 		msg += "  while expecting one of\n";
 		for(int i=0; i<expected.length; i++) 
 		{

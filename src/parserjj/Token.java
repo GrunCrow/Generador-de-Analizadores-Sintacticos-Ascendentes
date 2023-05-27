@@ -8,7 +8,7 @@ public class Token implements java.io.Serializable {
     public int beginColumn;
     public int endLine;
     public int endColumn;
-    public String image;
+    public String lexeme;
     public Token next;
     public Token specialToken;
 
@@ -18,13 +18,13 @@ public class Token implements java.io.Serializable {
         this(kind, null);
     }
 
-    public Token(TokenKind kind, String image) {
+    public Token(TokenKind kind, String lexeme) {
         this.kind = kind;
-        this.image = image;
+        this.lexeme = lexeme;
     }
 
-    public Object getValue() {
-        return image;
+    public String getLexeme() {
+        return lexeme;
     }
     
     public TokenKind getKind() {
@@ -32,11 +32,11 @@ public class Token implements java.io.Serializable {
     }
     
     public String toString() {
-        return image;
+        return lexeme;
     }
 
-    public static Token newToken(TokenKind kind, String image) {
-        return new Token(kind, image);
+    public static Token newToken(TokenKind kind, String lexeme) {
+        return new Token(kind, lexeme);
     }
 
     public static Token newToken(TokenKind kind) {

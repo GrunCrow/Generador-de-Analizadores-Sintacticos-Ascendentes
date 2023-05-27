@@ -34,8 +34,8 @@ public class TokenConstantsGenerator {
             int terminalTokenIndex = 1;
             Set<String> terminalLexemes = new HashSet<>();
             for (Token token : tokens) {
-                if (token.getKind() == TokenKind.TERMINAL && !terminalLexemes.contains(token.getValue().toString())) {
-                    String lexeme = token.getValue().toString();
+                if (token.getKind() == TokenKind.TERMINAL && !terminalLexemes.contains(token.getLexeme().toString())) {
+                    String lexeme = token.getLexeme().toString();
                     terminalLexemes.add(lexeme);
                     String extractedWord = lexeme.substring(1, lexeme.length() - 1); // para quitar < y >
                     writer.write("    public int " + extractedWord + " = " + terminalTokenIndex + ";\n");

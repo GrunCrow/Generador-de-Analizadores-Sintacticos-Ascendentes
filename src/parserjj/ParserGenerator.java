@@ -1,118 +1,159 @@
-import parserjj.*;
+package parserjj;
+
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ParserGenerator {
-
-    private static final String HEADER = "import generated.*;\nimport parserjj.*;\n\npublic class Parser extends SLRParser implements TokenConstants, SymbolConstants {\n\n";
-
-    private static final String CONSTRUCTOR = "    public Parser() {\n" +
-            "        initRules();\n" +
-            "        initActionTable();\n" +
-            "        initGotoTable();\n" +
-            "    }\n\n";
-
-    private static final String INIT_RULES = "    private void initRules() {\n" +
-            "        int[][] initRule = {\n" +
-            "            { 0, 0 },\n";
-
-    private static final String INIT_ACTION_TABLE = "    private void initActionTable() {\n" +
-            "        actionTable = new ActionElement[][] {\n";
-
-    private static final String INIT_GOTO_TABLE = "    private void initGotoTable() {\n" +
-            "        gotoTable = new int[][] {\n";
-
-    private static final String FOOTER = "        };\n" +
-            "    }\n\n" +
-            "}";
+    private SymbolTable symbolTable;
+    private TokenTable tokenTable;
+    private Map<String, Integer> nonTerminalIndices;
     
-
-    public static void generateParser(int[][] rules, ActionElement[][] actionTable, int[][] gotoTable, String outputFilePath) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath))) {
-            writer.write(HEADER);
-            writer.write(CONSTRUCTOR);
-            writer.write(INIT_RULES);
-            writeRuleTable(writer, rules);
-            writer.write(INIT_ACTION_TABLE);
-            writeActionTable(writer, actionTable);
-            writer.write(INIT_GOTO_TABLE);
-            writeGotoTable(writer, gotoTable);
-            writer.write(FOOTER);
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public ParserGenerator() {
+        symbolTable = new SymbolTable();
+        tokenTable = new TokenTable();
+        nonTerminalIndices = new HashMap<>();
     }
 
-    private static void writeRuleTable(BufferedWriter writer, int[][] rules) throws IOException {
-        for (int i = 0; i < rules.length; i++) {
-            writer.write("            { ");
-            writer.write(rules[i][0] + ", " + rules[i][1] + " },\n");
-        }
-        writer.write("        };\n");
+    public void generateParser(String grammarFilePath) throws IOException {
+        loadGrammar(grammarFilePath);
+        generateParserFile();
     }
 
-    private static void writeActionTable(BufferedWriter writer, ActionElement[][] actionTable) throws IOException {
-        writer.write("            ");
-        for (int i = 0; i < actionTable.length; i++) {
-            writer.write("new ActionElement[] { ");
-            for (int j = 0; j < actionTable[i].length; j++) {
-                ActionElement action = actionTable[i][j];
+    public void loadGrammar(String grammarFilePath) throws IOException {
+        int nonTerminalIndex = 0;
+        
+        Lexer lexer = new Lexer(grammarFilePath);
+        List<Token> tokens = lexer.tokenize();
+
+        for (Token token : tokens) {
+            TokenKind kind = token.getKind();
+            String lexeme = token.getLexeme();
+
+            if (kind == TokenKind.NOTERMINAL) {
+                String nonTerminal = lexeme.substring(1, lexeme.length() - 1);
+                nonTerminalIndices.put(nonTerminal, nonTerminalIndex);
+                symbolTable.addNonTerminal(nonTerminalIndex);
+                nonTerminalIndex++;
+            } else if (kind == TokenKind.TERMINAL) {
+                tokenTable.addTerminal(lexeme);
+            } else if (kind == TokenKind.EQ) {
+                processProduction(lexeme);
+            }
+        }
+
+        lexer.close();
+    }
+
+    private void processProduction(String production) {
+        String[] parts = production.split("::=");
+        String leftHandSide = parts[0].trim();
+        String rightHandSide = parts[1].trim();
+
+        if (rightHandSide.equals("epsilon")) {
+            rightHandSide = "";
+        }
+
+        String[] symbols = rightHandSide.split("\\s+");
+        int productionIndex = symbolTable.getNonTerminalIndex(leftHandSide);
+
+        for (String symbol : symbols) {
+            if (symbol.startsWith("<")) {
+                // Símbolo no terminal
+                int symbolIndex = symbolTable.getNonTerminalIndex(symbol.substring(1, symbol.length() - 1));
+                symbolTable.addNonTerminal(symbolIndex);
+            } else {
+                // Símbolo terminal
+                tokenTable.addTerminal(symbol);
+            }
+        }
+
+        symbolTable.addProduction(productionIndex, symbols.length);
+    }
+
+    private void generateParserFile() throws IOException {
+        String parserCode = generateParserCode();
+        String parserFilePath = "src/generated/Parser.java";
+        BufferedWriter writer = new BufferedWriter(new FileWriter(parserFilePath));
+        writer.write(parserCode);
+        writer.close();
+    }
+
+    private String generateParserCode() {
+        StringBuilder codeBuilder = new StringBuilder();
+
+        codeBuilder.append("public class Parser extends SLRParser implements TokenConstants, SymbolConstants {\n\n");
+        codeBuilder.append("  public Parser() {\n");
+        codeBuilder.append("    initRules();\n");
+        codeBuilder.append("    initActionTable();\n");
+        codeBuilder.append("    initGotoTable();\n");
+        codeBuilder.append("  }\n\n");
+
+        codeBuilder.append("  private void initRules() {\n");
+        codeBuilder.append("    int[][] initRule = {\n");
+
+        for (int i = 0; i < symbolTable.getNumProductions(); i++) {
+            String leftHandSide = symbolTable.getNonTerminal(i);
+            int rightHandSideLength = symbolTable.getProductionLength(i);
+            codeBuilder.append("      { ").append(leftHandSide).append(", ").append(rightHandSideLength).append(" },\n");
+        }
+
+        codeBuilder.append("    };\n\n");
+        codeBuilder.append("    this.rule = initRule;\n");
+        codeBuilder.append("  }\n\n");
+
+        codeBuilder.append("  private void initActionTable() {\n");
+        codeBuilder.append("    actionTable = new ActionElement[").append(symbolTable.getNumStates()).append("][")
+                .append(tokenTable.getNumTokens()).append("];\n\n");
+
+        for (int i = 0; i < symbolTable.getNumStates(); i++) {
+            for (int j = 0; j < tokenTable.getNumTokens(); j++) {
+                ActionElement action = symbolTable.getAction(i, j);
                 if (action != null) {
-                    writer.write("new ActionElement(" + action.getType() + ", " + action.getValue() + "), ");
-                } else {
-                    writer.write("null, ");
+                    codeBuilder.append("    actionTable[").append(i).append("][").append(j).append("] = new ActionElement(ActionElement.")
+                            .append(action.getType()).append(", ").append(action.getValue()).append(");\n");
                 }
             }
-            writer.write("},\n            ");
         }
-        writer.write("};\n");
-    }
 
-    private static void writeGotoTable(BufferedWriter writer, int[][] gotoTable) throws IOException {
-        writer.write("            ");
-        for (int i = 0; i < gotoTable.length; i++) {
-            writer.write("new int[] { ");
-            for (int j = 0; j < gotoTable[i].length; j++) {
-                writer.write(gotoTable[i][j] + ", ");
+        codeBuilder.append("  }\n\n");
+
+        codeBuilder.append("  private void initGotoTable() {\n");
+        codeBuilder.append("    gotoTable = new int[").append(symbolTable.getNumStates()).append("][")
+                .append(symbolTable.getNumNonTerminals()).append("];\n\n");
+
+        for (int i = 0; i < symbolTable.getNumStates(); i++) {
+            for (int j = 0; j < symbolTable.getNumNonTerminals(); j++) {
+                int goTo = symbolTable.getGoto(i, j);
+                if (goTo > 0) {
+                    codeBuilder.append("    gotoTable[").append(i).append("][").append(j).append("] = ").append(goTo).append(";\n");
+                }
             }
-            writer.write("},\n            ");
         }
-        writer.write("};\n");
+
+        codeBuilder.append("  }\n\n");
+
+        codeBuilder.append("}\n");
+
+        return codeBuilder.toString();
     }
 
     public static void main(String[] args) {
-        int[][] rules = {
-            { 0, 0 },
-            { Expr, 1 },
-            { Expr, 3 },
-            { Expr, 3 },
-            { Term, 1 },
-            { Term, 3 },
-            { Term, 3 },
-            { Factor, 1 },
-            { Factor, 3 },
-            { Factor, 4 },
-            { Args, 1 },
-            { Args, 0 },
-            { ArgumentList, 1 },
-            { ArgumentList, 3 }
-        };
-
-        ActionElement[][] actionTable = {
-            { null, null, null, null, null, null, null, null, null, null },
-            { null, null, null, null, null, null, null, null, null, null },
-            // ...
-        };
-
-        int[][] gotoTable = {
-            { 1, 2, 3, 0, 0 },
-            { 0, 0, 0, 0, 0 },
-            // ...
-        };
-
-        generateParser(rules, actionTable, gotoTable);
-        System.out.println("Parser.java generated successfully.");
+        try {
+            String grammarFilePath = "Main.txt";
+            
+            ParserGenerator parserGenerator = new ParserGenerator();
+            parserGenerator.generateParser(grammarFilePath);
+            System.out.println("Parser.java generado exitosamente.");
+        } catch (IOException e) {
+            System.out.println("Error al generar Parser.java: " + e.getMessage());
+        }
     }
+
+
 }

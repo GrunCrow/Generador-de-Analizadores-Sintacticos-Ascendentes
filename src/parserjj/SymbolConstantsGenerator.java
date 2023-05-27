@@ -33,8 +33,8 @@ public class SymbolConstantsGenerator {
             int terminalTokenIndex = 0;
             Set<String> terminalLexemes = new HashSet<>();
             for (Token token : tokens) {
-                if (token.getKind() == TokenKind.NOTERMINAL && !terminalLexemes.contains(token.getValue().toString())) {
-                    String lexeme = token.getValue().toString();
+                if (token.getKind() == TokenKind.NOTERMINAL && !terminalLexemes.contains(token.getLexeme().toString())) {
+                    String lexeme = token.getLexeme().toString();
                     terminalLexemes.add(lexeme);
                     writer.write("    public int " + lexeme + " = " + terminalTokenIndex + ";\n");
                     terminalTokenIndex++;

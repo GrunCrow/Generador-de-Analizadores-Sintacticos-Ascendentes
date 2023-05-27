@@ -12,8 +12,25 @@ public class main {
             String fileinput = "Main.txt";
             GrammarParser grammarParser = new GrammarParser();
             grammarParser.parseGrammar(fileinput);
-            // Aquí continuará el procesamiento de la gramática
-            // ...
+
+         // Generar las tablas de análisis de acción y desplazamiento
+        ActionElement[][] actionTable = grammarParser.generateActionTable();
+        int[][] gotoTable = grammarParser.generateGotoTable();
+        int[][] rules = generateRules()
+
+        // Aquí puedes implementar el analizador sintáctico utilizando las tablas generadas
+
+        // Por ejemplo, analizar una cadena de entrada
+        // Por ejemplo, analizar una cadena de entrada
+        String input = "1 + 2 * 3;";
+        SyntaxAnalyzer syntaxAnalyzer = new SyntaxAnalyzer(grammarParser, actionTable, gotoTable);
+        boolean isValid = syntaxAnalyzer.analyze(input);
+
+        if (isValid) {
+            System.out.println("La cadena es válida.");
+        } else {
+            System.out.println("La cadena no es válida. Se encontró un error en el análisis.");
+        }
         } catch (IOException e) {
             e.printStackTrace();
         }
