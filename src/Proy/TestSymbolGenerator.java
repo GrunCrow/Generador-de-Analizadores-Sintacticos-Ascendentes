@@ -1,9 +1,9 @@
 package Proy;
 
-import parserjj.*;
-
 import java.io.IOException;
 import java.util.List;
+
+import grammar_parser.*;
 
 public class TestSymbolGenerator {
 

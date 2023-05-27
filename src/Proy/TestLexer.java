@@ -1,13 +1,13 @@
 package Proy;
 
-import parserjj.*;
-
 import java.io.IOException;
+
+import grammar_parser.*;
 
 public class TestLexer {
     public static void main(String[] args) {
         try {
-            Lexer lexer = new Lexer("TestLexer.txt");
+            Lexer lexer = new Lexer("Main.txt");
             Token currentToken;
 
             do {
@@ -15,7 +15,7 @@ public class TestLexer {
                 currentToken = lexer.getCurrentToken();
                 if (currentToken != null) {
                     String currentLexeme = lexer.getCurrentLexeme();
-                    System.out.println("Token: " + currentToken.kind + " | Lexema: " + currentLexeme);
+                    System.out.println("Token: " + currentToken.getKind() + " | Lexema: " + currentLexeme);
                 }
             } while (lexer.getCurrentToken() != null);
 

@@ -1,12 +1,12 @@
 package Proy;
 
-import parserjj.*;
+import grammar_parser.*;
 
 public class TestParser {
     public static void main(String[] args) {
-        String filePath = "TestParser.txt";
+        String filePath = "Main.txt";
 
-        Parser parser = new Parser(filePath);
+        GrammarParser parser = new GrammarParser(filePath);
 		parser.parse();
 		parser.close();
 		System.out.println("Parsing completed successfully.");
