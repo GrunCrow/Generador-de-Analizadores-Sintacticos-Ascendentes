@@ -14,7 +14,7 @@ public class Compiler {
         String path = (args.length == 0 ? System.getProperty("user.dir") : args[0]);
         File workingdir = new File(path);
 
-        String grammarFilePath = "Main.grammar";
+        String grammarFilePath = "Main.txt";
 
         try {
             // Generar el archivo de tokens y símbolos para la gramática dada
@@ -47,19 +47,21 @@ public class Compiler {
             
             ParserGenerator generator = new ParserGenerator(actions, gototable, rules);
             
-            generator.generateParsingTable("src/generated/Parser.java");
+            generator.generateParser("src/generated/Parser.java");
 
             // Crear instancia del analizador sintáctico
             Parser parserInstance  = new Parser();
 
             // Si el análisis es exitoso, imprimir "Correcto"
-            if (parserInstance.parse(new File(workingdir, "Main.txt"))) {
+            Lexer lexer = new Lexer(grammarFilePath);
+            if (parserInstance.parse(lexer)) {
                 printOutput(workingdir, "Correcto");
             }
             // Si el análisis es fallido, imprimir "Incorrecto"
             else {
                 printOutput(workingdir, "Incorrecto");
             }
+            lexer.close();
         } catch (Error err) {
             printError(workingdir, err);
             printOutput(workingdir, "Incorrecto");

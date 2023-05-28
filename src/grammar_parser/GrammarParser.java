@@ -46,6 +46,7 @@ public class GrammarParser extends SLRParser {
         while (currentToken != null) {
             definicion();
         }
+        initGotoTable();
     }
 
     private void definicion() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
@@ -239,6 +240,10 @@ public class GrammarParser extends SLRParser {
         return gotoTable;
     }
 
+    public ActionElement[][] getActionsTable() {
+		return actionTable;
+	}
+    
     public static void main(String[] args) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         GrammarParser parser = new GrammarParser("Main.txt");
         parser.parse();

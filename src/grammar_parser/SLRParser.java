@@ -83,7 +83,7 @@ public abstract class SLRParser {
 	}
 	
 
-	private boolean step() throws SintaxException, IOException 
+	protected boolean step() throws SintaxException, IOException 
 	{
 		int state = ((Integer) stack.lastElement()).intValue();
 		// de la tabla de acci�n action es la acci�n a ejecutar

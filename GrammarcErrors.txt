@@ -1,2 +1,2 @@
 [File Main.tinto] 1 error found:
-java.lang.NullPointerException: Cannot invoke "grammar_parser.Lexer.getNextToken()" because "this.lexer" is null
+java.lang.NullPointerException: Cannot load from object array because "this.actionTable" is null
