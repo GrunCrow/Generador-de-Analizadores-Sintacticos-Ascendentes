@@ -1,9 +1,13 @@
 package grammar_parser;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.Stack;
 
 public class GrammarParser extends SLRParser {
     private Lexer lexer;
@@ -20,6 +24,7 @@ public class GrammarParser extends SLRParser {
         getNextToken();
 
         rules = new ArrayList<>();
+        gotoTable = new int[0][0];
     }
 
     private void getNextToken() {
@@ -45,6 +50,9 @@ public class GrammarParser extends SLRParser {
             match(TokenKind.EQ);
             listaReglas(leftHandSide);
             match(TokenKind.SEMICOLON);
+            
+            // Generar la tabla Goto
+            generarGotoTable();
         } else if (currentToken.getKind() == TokenKind.COMENTARIO) {
             parseComment();
         } else {
@@ -99,19 +107,19 @@ public class GrammarParser extends SLRParser {
 
     // Métodos abstractos a implementar
 
-    protected int getRowCount() {
+    protected int rules_getRowCount() {
         // Implementación para obtener el número de filas en la tabla de reglas
         return rules.size();
     }
 
-    protected int getColumnCount() {
+    protected int rules_getColumnCount() {
         // Implementación para obtener el número de columnas en la tabla de reglas
         return 2;
     }
 
     protected String getLeftHandSide(int row) {
         // Implementación para obtener el lado izquierdo de una regla en la tabla de reglas
-        if (row >= 0 && row < getRowCount()) {
+        if (row >= 0 && row < rules_getRowCount()) {
             return rules.get(row)[0];
         }
         return null;
@@ -119,7 +127,7 @@ public class GrammarParser extends SLRParser {
 
     protected String[] getRightHandSide(int row) {
         // Implementación para obtener el lado derecho de una regla en la tabla de reglas
-        if (row >= 0 && row < getRowCount()) {
+        if (row >= 0 && row < rules_getRowCount()) {
             return rules.get(row)[1].split(" ");
         }
         return null;
@@ -128,6 +136,42 @@ public class GrammarParser extends SLRParser {
     protected void setRule(int rowIndex, String leftHandSide, String[] rightHandSide) {
         // No se implementa este método ya que la lógica se ha modificado para evitar la sobreescritura de reglas
     }
+    
+    
+    private List<String> obtenerSimbolosNoTerminales() {
+        List<String> nonTerminals = new ArrayList<>();
+        try {
+            Class<?> symbolConstantsClass = Class.forName("generated.SymbolConstants");
+            Field[] fields = symbolConstantsClass.getDeclaredFields();
+            for (Field field : fields) {
+                int modifiers = field.getModifiers();
+                if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && field.getType() == int.class) {
+                    nonTerminals.add(field.getName());
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return nonTerminals;
+    }
+    
+    
+    // Generar Tabla Goto    
+    private void generarGotoTable() {
+    	// Obtener los símbolos no terminales
+        List<String> nonTerminals = obtenerSimbolosNoTerminales();
+        
+        // Numero de estados
+        n_estados = 0;
+        
+        // Crear una matriz para la tabla Goto
+        gotoTable = new int[n_estados][nonTerminals.size()];
+
+        
+    }
+    
+    
+    // Devolver tablas
 
     public String[][] getRules() {
         String[][] rulesArray = new String[rules.size()][2];
@@ -136,11 +180,20 @@ public class GrammarParser extends SLRParser {
         }
         return rulesArray;
     }
+    
+    public int[][] getGotoTable() {
+        return gotoTable;
+    }
 
     public static void main(String[] args) {
         GrammarParser parser = new GrammarParser("Main.txt");
         parser.parse();
         String[][] rules = parser.getRules();
+        System.out.println("Reglas:");
         System.out.println(Arrays.deepToString(rules));
+
+        int[][] gotoTable = parser.getGotoTable();
+        System.out.println("Tabla Goto:");
+        System.out.println(Arrays.deepToString(gotoTable));
     }
 }

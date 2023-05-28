@@ -39,9 +39,9 @@ public class Compiler {
             System.out.println("Parsing completado correctamente.");
 
             // Generar el analizador sintáctico utilizando ParserGenerator
-            RuleTable rules = parser.getRulesTable();
-            ActionTable actions = parser.getActionsTable();
-            GotoTable goto = parser.getGotoTable();
+            String[][] rules = parser.getRules();
+            int[][] actions = parser.getActionsTable();
+            int[][] goto = parser.getGotoTable();
             ParserGenerator parserGenerator = new ParserGenerator();
             
             parserGenerator.generateParsingTable(rules);
