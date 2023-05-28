@@ -1,18 +1,15 @@
 package grammar_parser;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Stack;
+import java.util.List;
 
-import generated.SymbolConstants;
-import generated.TokenConstants;
-
-public class GrammarParser extends SLRParser{
+public class GrammarParser extends SLRParser {
     private Lexer lexer;
     private Token currentToken;
-    private RuleTable ruleTable;
-    private ActionTable actionTable;
-    private GotoTable gotoTable;
+
+    protected List<String[]> rules;
 
     public GrammarParser(String filePath) {
         try {
@@ -21,9 +18,8 @@ public class GrammarParser extends SLRParser{
             e.printStackTrace();
         }
         getNextToken();
-        ruleTable = new RuleTable(); // Inicializar con una tabla vacía
-        actionTable = new ActionTable(); // Inicializar con una tabla vacía
-        gotoTable = new GotoTable(); // Inicializar con una tabla vacía
+
+        rules = new ArrayList<>();
     }
 
     private void getNextToken() {
@@ -42,10 +38,9 @@ public class GrammarParser extends SLRParser{
     }
 
     private void definicion() {
-    	System.out.println(currentToken.getLexeme());
-    	System.out.println(currentToken.getKind());
+        // System.out.println(currentToken.getLexeme());
         if (currentToken.getKind() == TokenKind.NOTERMINAL) {
-        	String leftHandSide = currentToken.getLexeme();
+            String leftHandSide = currentToken.getLexeme();
             match(TokenKind.NOTERMINAL);
             match(TokenKind.EQ);
             listaReglas(leftHandSide);
@@ -53,7 +48,7 @@ public class GrammarParser extends SLRParser{
         } else if (currentToken.getKind() == TokenKind.COMENTARIO) {
             parseComment();
         } else {
-        	match(TokenKind.NOTERMINAL);
+            match(TokenKind.NOTERMINAL);
         }
     }
 
@@ -63,164 +58,89 @@ public class GrammarParser extends SLRParser{
     }
 
     private void listaReglas(String leftHandSide) {
-        // regla(leftHandSide);
-        while (currentToken.getKind() != TokenKind.SEMICOLON) {     
-            regla(leftHandSide);
+        regla(leftHandSide);
+        while (currentToken.getKind() == TokenKind.BAR) {
             match(TokenKind.BAR);
+            regla(leftHandSide);
         }
     }
 
     private void regla(String leftHandSide) {
-        String[] rightHandSide = new String[0];
+        List<String> rightHandSide = new ArrayList<>();
         while (currentToken.getKind() == TokenKind.NOTERMINAL || currentToken.getKind() == TokenKind.TERMINAL) {
-        	String symbol;
-            if (currentToken.getKind() == TokenKind.TERMINAL) {
-                symbol = currentToken.getLexeme();
-                getNextToken();
-            } else {
-                symbol = currentToken.getLexeme();
-                getNextToken();
-            }
-            rightHandSide = appendToArray(rightHandSide, symbol);
+            String symbol = currentToken.getLexeme();
+            getNextToken();
+            rightHandSide.add(symbol);
         }
 
-        // Obtener el índice de fila y columna en la tabla de reglas
-        int rowIndex = getRuleRowIndex(leftHandSide);
-        int columnIndex = getRuleColumnIndex(rightHandSide);
+        // Verificar si ya existe una regla con el mismo lado izquierdo y lado derecho
+        if (!ruleExists(leftHandSide, rightHandSide.toArray(new String[0]))) {
+            rules.add(new String[]{leftHandSide, String.join(" ", rightHandSide)});
+        }
+    }
 
-        // Crear y guardar la regla en la tabla de reglas
-        Rule rule = new Rule(leftHandSide, rightHandSide);
-        ruleTable.setRule(rowIndex, columnIndex, rule);
-    }
-    
-    private String[] appendToArray(String[] array, String element) {
-        int length = array.length;
-        String[] newArray = Arrays.copyOf(array, length + 1);
-        newArray[length] = element;
-        return newArray;
-    }
-    
-    private int getRuleRowIndex(String leftHandSide) {
-        for (int row = 0; row < ruleTable.getRowCount(); row++) {
-            Rule rule = ruleTable.getRule(row, 0);
-            if (rule != null && rule.getLeftHandSide().equals(leftHandSide)) {
-                return row;
+    private boolean ruleExists(String leftHandSide, String[] rightHandSide) {
+        for (String[] rule : rules) {
+            if (rule[0].equals(leftHandSide) && Arrays.equals(rule[1].split(" "), rightHandSide)) {
+                return true;
             }
         }
-        return ruleTable.getRowCount(); // Si no se encuentra el leftHandSide en la tabla de reglas
+        return false;
     }
 
-    private int getRuleColumnIndex(String[] rightHandSide) {
-        for (int column = 0; column < ruleTable.getColumnCount(); column++) {
-            Rule rule = ruleTable.getRule(0, column);
-            if (rule != null && rule.getRightHandSide().length == rightHandSide.length) {
-                boolean matches = true;
-                for (int i = 0; i < rightHandSide.length; i++) {
-                    if (!rule.getRightHandSide()[i].equals(rightHandSide[i])) {
-                        matches = false;
-                        break;
-                    }
-                }
-                if (matches) {
-                    return column;
-                }
-            }
-        }
-        return ruleTable.getColumnCount(); // Si no se encuentra el rightHandSide en la tabla de reglas
-    }
-    
-    
-    private int getTokenCount() {
-        int maxToken = -1;
-        
-        // Itera sobre los campos de la interfaz TokenConstants
-        // para encontrar el máximo valor de categoría léxica (token)
-        Class<TokenConstants> tokenConstantsClass = TokenConstants.class;
-        java.lang.reflect.Field[] fields = tokenConstantsClass.getDeclaredFields();
-        for (java.lang.reflect.Field field : fields) {
-            if (field.getType() == int.class) {
-                try {
-                    int tokenValue = field.getInt(null);
-                    if (tokenValue > maxToken) {
-                        maxToken = tokenValue;
-                    }
-                } catch (IllegalAccessException e) {
-                    // Manejo de excepciones si es necesario
-                }
-            }
-        }
-        
-        // El número de columnas es el máximo valor de categoría léxica (token) + 1
-        return maxToken + 1;
-    }
-    
-    private int getSymbolCount() {
-        int maxSymbol = -1;
-        
-        // Itera sobre los campos de la interfaz TokenConstants
-        // para encontrar el máximo valor de categoría léxica (token)
-        Class<SymbolConstants> SymbolConstantsClass = SymbolConstants.class;
-        java.lang.reflect.Field[] fields = SymbolConstantsClass.getDeclaredFields();
-        for (java.lang.reflect.Field field : fields) {
-            if (field.getType() == int.class) {
-                try {
-                    int symbolValue = field.getInt(null);
-                    if (symbolValue > maxSymbol) {
-                    	maxSymbol = symbolValue;
-                    }
-                } catch (IllegalAccessException e) {
-                    // Manejo de excepciones si es necesario
-                }
-            }
-        }
-        
-        // El número de columnas es el máximo valor de categoría léxica (token) + 1
-        return maxSymbol + 1;
-    }
-    
-    
-	
-
-
-    private GotoTable getGoto(int state, int symbol) {
-        return gotoTable;
-    }
-
-    
-    
-    
-    
-    public RuleTable getRulesTable() {
-    	return ruleTable;
-    }
-    
-    
-    public ActionTable getActionsTable() {
-    	return actionTable;
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    private void match(int expectedTokenKind) {
-        if (currentToken != null && currentToken.getKind() == expectedTokenKind) {
+    private void match(int expectedKind) {
+        if (currentToken.getKind() == expectedKind) {
             getNextToken();
         } else {
-            reportError("Se esperaba " + expectedTokenKind);
+            throw new RuntimeException("Error de sintaxis. Se esperaba " + expectedKind
+                    + ", se encontró " + currentToken.getKind());
         }
     }
 
-    private void reportError(String message) {
-        System.err.println("Error: " + message);
+    // Métodos abstractos a implementar
+
+    protected int getRowCount() {
+        // Implementación para obtener el número de filas en la tabla de reglas
+        return rules.size();
     }
 
-    public void close() {
-        lexer.close();
+    protected int getColumnCount() {
+        // Implementación para obtener el número de columnas en la tabla de reglas
+        return 2;
+    }
+
+    protected String getLeftHandSide(int row) {
+        // Implementación para obtener el lado izquierdo de una regla en la tabla de reglas
+        if (row >= 0 && row < getRowCount()) {
+            return rules.get(row)[0];
+        }
+        return null;
+    }
+
+    protected String[] getRightHandSide(int row) {
+        // Implementación para obtener el lado derecho de una regla en la tabla de reglas
+        if (row >= 0 && row < getRowCount()) {
+            return rules.get(row)[1].split(" ");
+        }
+        return null;
+    }
+
+    protected void setRule(int rowIndex, String leftHandSide, String[] rightHandSide) {
+        // No se implementa este método ya que la lógica se ha modificado para evitar la sobreescritura de reglas
+    }
+
+    public String[][] getRules() {
+        String[][] rulesArray = new String[rules.size()][2];
+        for (int i = 0; i < rules.size(); i++) {
+            rulesArray[i] = rules.get(i);
+        }
+        return rulesArray;
+    }
+
+    public static void main(String[] args) {
+        GrammarParser parser = new GrammarParser("Main.txt");
+        parser.parse();
+        String[][] rules = parser.getRules();
+        System.out.println(Arrays.deepToString(rules));
     }
 }

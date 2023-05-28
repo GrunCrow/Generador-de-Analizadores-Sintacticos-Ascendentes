@@ -12,7 +12,6 @@ public class Lexer {
     private BufferedReader reader;
     private String currentLine;
     private int currentLineIndex;
-    private int currentColumnIndex;
     private Token currentToken;
     private String currentLexeme;
     private Map<String, Integer> tokenMap;
@@ -21,7 +20,6 @@ public class Lexer {
         reader = new BufferedReader(new FileReader(filePath));
         currentLine = reader.readLine();
         currentLineIndex = 0;
-        currentColumnIndex = 0;
         currentToken = null;
         currentLexeme = null;
         tokenMap = new HashMap<>();
@@ -46,7 +44,6 @@ public class Lexer {
         if (currentLineIndex >= currentLine.length()) {
             currentLine = reader.readLine();
             currentLineIndex = 0;
-            currentColumnIndex = 0;
             getNextToken();
             return;
         }
@@ -70,7 +67,6 @@ public class Lexer {
                 currentLexeme = "::=";
             	currentToken = Token.newToken(TokenKind.EQ, currentLexeme);
                 currentLineIndex += 2;
-                currentColumnIndex += 2;
             } else {
             	currentLexeme = String.valueOf(currentChar);
                 currentToken = Token.newToken(TokenKind.UNKNOWN, currentLexeme);
@@ -87,7 +83,6 @@ public class Lexer {
         }
 
         currentLineIndex++;
-        currentColumnIndex++;
     }
 
 
@@ -96,8 +91,6 @@ public class Lexer {
         sb.append(currentLine.charAt(currentLineIndex)); // '/'
         sb.append(currentLine.charAt(currentLineIndex + 1)); // '*'
         currentLineIndex += 2;
-        currentColumnIndex += 2;
-
         boolean commentEndFound = false;
         while (currentLineIndex < currentLine.length() && !commentEndFound) {
             char currentChar = currentLine.charAt(currentLineIndex);
@@ -108,12 +101,10 @@ public class Lexer {
                     commentEndFound = true;
                     sb.append('/');
                     currentLineIndex++;
-                    currentColumnIndex++;
                 }
             }
 
             currentLineIndex++;
-            currentColumnIndex++;
         }
 
         currentLexeme = sb.toString();
@@ -124,13 +115,10 @@ public class Lexer {
         sb.append(currentLine.charAt(currentLineIndex));
 
         currentLineIndex++;
-        currentColumnIndex++;
-
         while (currentLineIndex < currentLine.length() &&
                 (Character.isLetterOrDigit(currentLine.charAt(currentLineIndex)) || currentLine.charAt(currentLineIndex) == '_')) {
             sb.append(currentLine.charAt(currentLineIndex));
             currentLineIndex++;
-            currentColumnIndex++;
         }
 
         currentLexeme = sb.toString();
@@ -143,18 +131,14 @@ public class Lexer {
         sb.append(currentLine.charAt(currentLineIndex)); // '<'
 
         currentLineIndex++;
-        currentColumnIndex++;
-
         while (currentLineIndex < currentLine.length() && currentLine.charAt(currentLineIndex) != '>') {
             sb.append(currentLine.charAt(currentLineIndex));
             currentLineIndex++;
-            currentColumnIndex++;
         }
 
         if (currentLineIndex < currentLine.length()) {
             sb.append(currentLine.charAt(currentLineIndex)); // '>'
             currentLineIndex++;
-            currentColumnIndex++;
         }
 
         currentLexeme = sb.toString();
@@ -167,7 +151,6 @@ public class Lexer {
                 (currentLine.charAt(currentLineIndex) == ' ' || currentLine.charAt(currentLineIndex) == '\r' ||
                         currentLine.charAt(currentLineIndex) == '\n' || currentLine.charAt(currentLineIndex) == '\t')) {
             currentLineIndex++;
-            currentColumnIndex++;
         }
     }
 
@@ -197,6 +180,42 @@ public class Lexer {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public int getSymbolIndex(String symbol) {
+        for (Map.Entry<String, Integer> entry : tokenMap.entrySet()) {
+            if (entry.getKey().equals(symbol)) {
+                return entry.getValue();
+            }
+        }
+        return -1; // Si el símbolo no está en el tokenMap
+    }
+
+    public String getSymbol(int symbolIndex) {
+        for (Map.Entry<String, Integer> entry : tokenMap.entrySet()) {
+            if (entry.getValue() == symbolIndex) {
+                return entry.getKey();
+            }
+        }
+        return null; // Si el símbolo no está en el tokenMap
+    }
+
+    public String getNonTerminal(int nonTerminalSymbolIndex) {
+        for (Map.Entry<String, Integer> entry : tokenMap.entrySet()) {
+            if (entry.getValue() == nonTerminalSymbolIndex) {
+                return entry.getKey();
+            }
+        }
+        return null; // Si el símbolo no está en el tokenMap
+    }
+    
+    public int getNonTerminalIndex(String nonTerminal) {
+        for (Map.Entry<String, Integer> entry : tokenMap.entrySet()) {
+            if (entry.getKey().equals(nonTerminal) && entry.getValue() >= TokenKind.NOTERMINAL) {
+                return entry.getValue();
+            }
+        }
+        return -1; // Si el símbolo no terminal no está en el tokenMap o no es un símbolo no terminal
     }
 }
 

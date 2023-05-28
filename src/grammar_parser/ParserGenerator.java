@@ -4,11 +4,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class ParserGenerator {
-    private ActionTable actionTable;
-    private GotoTable gotoTable;
-    private RuleTable ruleTable;
+    private int[][] actionTable;
+    private int[][] gotoTable;
+    private int[][] ruleTable;
 
-    public ParserGenerator(ActionTable actionTable, GotoTable gotoTable, RuleTable rule) {
+    public ParserGenerator(int[][] actionTable, int[][] gotoTable, int[][] rule) {
         this.actionTable = actionTable;
         this.gotoTable = gotoTable;
         this.ruleTable = rule;
@@ -22,16 +22,22 @@ public class ParserGenerator {
             writer.write("    public Parser(Lexer lexer) throws SintaxException, IOException {\n");
             writer.write("        super.parse(lexer);\n");
             writer.write("    }\n\n");
+            
+            
             writer.write("    @Override\n");
             writer.write("    protected ActionElement[][] getActionTable() {\n");
             writeActionTable(writer);
             writer.write("        return actionTable;\n");
             writer.write("    }\n\n");
+            
+            
             writer.write("    @Override\n");
             writer.write("    protected int[][] getGotoTable() {\n");
             writeGotoTable(writer);
             writer.write("        return gotoTable;\n");
             writer.write("    }\n\n");
+            
+            
             writer.write("    @Override\n");
             writer.write("    protected int[][] getRuleTable() {\n");
             writeRuleTable(writer);

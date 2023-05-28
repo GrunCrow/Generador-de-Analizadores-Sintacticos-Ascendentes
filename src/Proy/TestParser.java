@@ -8,8 +8,8 @@ public class TestParser {
 
         GrammarParser parser = new GrammarParser(filePath);
 		parser.parse();
-		RuleTable rules = parser.getRulesTable();
-		parser.close();
+		// RuleTable rules = parser.getRulesTable();
+		// parser.close();
 		System.out.println("Parsing completed successfully.");
     }
 }

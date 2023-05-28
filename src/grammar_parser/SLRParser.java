@@ -27,7 +27,8 @@ public abstract class SLRParser {
 	
 	protected int[][] gotoTable;
 	
-	protected int[][] rule;
+	protected int[][] rules;
+    protected static final int COLUMN_COUNT = 2; // Número de columnas en la tabla de reglas
 	
 	protected boolean parse(Lexer lexer) throws SintaxException, IOException
 	{
@@ -59,15 +60,14 @@ public abstract class SLRParser {
 	}
 	
 
-	// Reducci�n
-	protected void reduceAction(ActionElement action) 
-	{
+	// Reduccion
+	protected void reduceAction(ActionElement action) {
 		int ruleIndex = action.getValue();
 		
 		// simbolo de la izq
-		int numSymbols = rule[ruleIndex][1];
+		int numSymbols = rules[ruleIndex][1];
 		// simbolo de la dcha
-		int leftSymbol = rule[ruleIndex][0];
+		int leftSymbol = rules[ruleIndex][0];
 		// desapilar y ver que queda en la cima de la pila
 		while(numSymbols > 0) {
 			// desapilar
@@ -126,4 +126,32 @@ public abstract class SLRParser {
 		}
 		return false;
 	}
+	
+	protected void setRules(int[][] rules) {
+        this.rules = rules;
+    }
+	
+    protected int rules_getRowCount() {
+        return rules.length;
+    }
+    
+    protected int rules_getColumnCount() {
+        return rules[0].length;
+    }
+    
+    protected void setRule(int rowIndex, int columnIndex, String leftHandSide, String[] rightHandSide) {
+        // Implementación para guardar una regla en la tabla de reglas
+        if (rowIndex >= 0 && rowIndex < rules_getRowCount() && columnIndex >= 0 && columnIndex < rules_getColumnCount()) {
+            int nonTerminalSymbolIndex = lexer.getNonTerminalIndex(leftHandSide);
+            int ruleLength = rightHandSide.length;
+            int[] rule = new int[ruleLength + 2];
+            rule[0] = nonTerminalSymbolIndex;
+            rule[1] = ruleLength;
+            for (int i = 0; i < ruleLength; i++) {
+                int symbolIndex = lexer.getSymbolIndex(rightHandSide[i]);
+                rule[i + 2] = symbolIndex;
+            }
+            rules[rowIndex] = rule;
+        }
+    }
 }
