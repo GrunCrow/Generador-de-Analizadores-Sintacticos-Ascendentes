@@ -1,2 +1,2 @@
 [File Main.tinto] 1 error found:
-java.lang.ArrayIndexOutOfBoundsException: Index 5 out of bounds for length 5
+java.lang.NullPointerException: Cannot load from object array because "this.actionTable" is null

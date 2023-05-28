@@ -63,9 +63,9 @@ public class ParserGenerator {
     }
 
 	private void writeGotoTable(FileWriter writer) throws IOException {
+		List<String> noterminales = obtenerSimbolosNoTerminales();
 		int num_rows = gotoTable.length;
 		int num_cols = gotoTable[0].length;
-		int i = 0;
 
 		writer.write("		gotoTable = new int[");
 		writer.write(Integer.toString(num_rows));
@@ -73,16 +73,21 @@ public class ParserGenerator {
 		writer.write(Integer.toString(num_cols));
 		writer.write("];\n");
 		
-		for(i = 0; i<num_rows-1;i++) {
-			writer.write("		gotoTable["); 
-			writer.write(Integer.toString(i)); 
-			writer.write("]["); 
-			writer.write(Integer.toString(i)); 
-			writer.write("] = ");
-			writer.write(Integer.toString(gotoTable[i][0]));
-			writer.write(";\n");
-		}
 		
+		for(int i = 0; i<num_rows;i++) {
+			for(int j = 0; j < num_cols; j++) {
+				if (gotoTable[i][j] != 0) {
+					writer.write("		gotoTable["); 
+					writer.write(Integer.toString(i)); 
+					writer.write("]["); 
+					writer.write(noterminales.get(j)); 
+					writer.write("] = ");
+					writer.write(Integer.toString(gotoTable[i][j]));
+					writer.write(";\n");
+				}
+			}
+			writer.write("\n");
+		}		
 	}
 
 	

@@ -195,7 +195,8 @@ public class GrammarParser extends SLRParser {
      * */
     private void initGotoTable() {
         List<String> nonTerminalSymbols = obtenerSimbolosNoTerminales();
-        this.gotoTable = new int[rules.size()][nonTerminalSymbols.size()];
+        List<String> TerminalSymbols = obtenerSimbolosTerminales();
+        this.gotoTable = new int[numStates][nonTerminalSymbols.size()];
 
         for (int i = 0; i < rules.size(); i++) {
             String leftHandSide = getLeftHandSide(i);
@@ -213,6 +214,7 @@ public class GrammarParser extends SLRParser {
             }
         }
     }
+
 
     
     // Generar Tabla Goto

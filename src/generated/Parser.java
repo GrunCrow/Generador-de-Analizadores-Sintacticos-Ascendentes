@@ -37,18 +37,34 @@ public Parser() throws SintaxException, IOException {
 
 	private void initGotoTable() {
 		gotoTable = new int[13][5];
-		gotoTable[0][0] = 0;
-		gotoTable[1][1] = 2;
-		gotoTable[2][2] = 3;
-		gotoTable[3][3] = 0;
-		gotoTable[4][4] = 0;
-		gotoTable[5][5] = 0;
-		gotoTable[6][6] = 0;
-		gotoTable[7][7] = 8;
-		gotoTable[8][8] = 0;
-		gotoTable[9][9] = 0;
-		gotoTable[10][10] = 0;
-		gotoTable[11][11] = 12;
+		gotoTable[0][Term] = 1;
+
+		gotoTable[1][Expr] = 2;
+		gotoTable[1][Term] = 2;
+
+		gotoTable[2][Expr] = 3;
+		gotoTable[2][Term] = 3;
+
+		gotoTable[3][Factor] = 4;
+
+		gotoTable[4][Term] = 5;
+		gotoTable[4][Factor] = 5;
+
+		gotoTable[5][Term] = 6;
+		gotoTable[5][Factor] = 6;
+
+		gotoTable[7][Expr] = 8;
+
+		gotoTable[8][Args] = 9;
+
+		gotoTable[9][ArgumentList] = 10;
+
+
+		gotoTable[11][Expr] = 12;
+
+		gotoTable[12][Expr] = 13;
+		gotoTable[12][ArgumentList] = 13;
+
      }
 
 }
