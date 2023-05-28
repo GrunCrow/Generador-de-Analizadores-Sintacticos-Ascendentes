@@ -15,25 +15,25 @@ public Parser() throws SintaxException, IOException {
     private void initRules() {
 		int[][] initRule = {
 			{ 0, 0 } ,
-			{ 0, 1 },
-			{ 0, 3 },
-			{ 0, 3 },
-			{ 1, 1 },
-			{ 1, 3 },
-			{ 1, 3 },
-			{ 2, 1 },
-			{ 2, 3 },
-			{ 2, 4 },
-			{ 3, 1 },
-			{ 3, 0 },
-			{ 4, 1 },
-			{ 4, 3 }
+			{ Expr, 1 },
+			{ Expr, 3 },
+			{ Expr, 3 },
+			{ Term, 1 },
+			{ Term, 3 },
+			{ Term, 3 },
+			{ Factor, 1 },
+			{ Factor, 3 },
+			{ Factor, 4 },
+			{ Args, 1 },
+			{ Args, 0 },
+			{ ArgumentList, 1 },
+			{ ArgumentList, 3 }
 		};
 		this.rules = initRule;;
     }
 
-     private void initActionTable() {
-     }
+    private void initActionTable() {
+    }
 
 	private void initGotoTable() {
 		gotoTable = new int[13][5];
@@ -49,5 +49,6 @@ public Parser() throws SintaxException, IOException {
 		gotoTable[9][9] = 0;
 		gotoTable[10][10] = 0;
 		gotoTable[11][11] = 12;
-	}
+     }
+
 }
