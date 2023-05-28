@@ -35,23 +35,23 @@ public class Compiler {
             // Comprobar que la sintaxis sea correcta
             GrammarParser parser = new GrammarParser(grammarFilePath);
             parser.parse();
-            parser.close();
+            // parser.close();
             System.out.println("Parsing completado correctamente.");
 
             // Generar el analizador sintáctico utilizando ParserGenerator
-            String[][] rules = parser.getRules();
+            int[][] rules = parser.getRules();
             int[][] gototable = parser.getGotoTable();
-            int[][] actions = parser.getActionsTable();
+            ActionElement[][] actions = parser.getActionsTable();
             
-            ParserGenerator parserGenerator = new ParserGenerator(actions, gototable, rules);
+            ParserGenerator generator = new ParserGenerator(actions, gototable, rules);
             
             // parserGenerator.generateParsingTable(rules);
 
             // Crear instancia del analizador sintáctico
-            Parser parser = new Parser();
+            Parser parserInstance  = new Parser();
 
             // Si el análisis es exitoso, imprimir "Correcto"
-            if (parser.parse(new File(workingdir, "Main.txt"))) {
+            if (parserInstance.parse(new File(workingdir, "Main.txt"))) {
                 printOutput(workingdir, "Correcto");
             }
             // Si el análisis es fallido, imprimir "Incorrecto"

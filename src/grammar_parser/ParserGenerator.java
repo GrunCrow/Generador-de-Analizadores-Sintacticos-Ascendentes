@@ -4,11 +4,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class ParserGenerator {
-    private int[][] actionTable;
+    private ActionElement[][] actionTable;
     private int[][] gotoTable;
-    private String[][] ruleTable;
+    private int[][] ruleTable;
 
-    public ParserGenerator(int[][] actionTable, int[][] gotoTable, String[][] rules) {
+    public ParserGenerator(ActionElement[][] actionTable, int[][] gotoTable, int[][] rules) {
         this.actionTable = actionTable;
         this.gotoTable = gotoTable;
         this.ruleTable = rules;

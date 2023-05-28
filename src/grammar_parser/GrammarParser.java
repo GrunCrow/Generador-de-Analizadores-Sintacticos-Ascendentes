@@ -9,11 +9,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
+import generated.SymbolConstants;
+import generated.TokenConstants;
+
 public class GrammarParser extends SLRParser {
     private Lexer lexer;
     private Token currentToken;
 
-    protected List<String[]> rules;
+    protected List<String[]> rules_symbols;
+    protected List<int[]> rules;
+
 
     public GrammarParser(String filePath) {
         try {
@@ -23,6 +28,7 @@ public class GrammarParser extends SLRParser {
         }
         getNextToken();
 
+        rules_symbols = new ArrayList<>();
         rules = new ArrayList<>();
         gotoTable = new int[0][0];
     }
@@ -36,13 +42,13 @@ public class GrammarParser extends SLRParser {
         }
     }
 
-    public void parse() {
+    public void parse() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         while (currentToken != null) {
             definicion();
         }
     }
 
-    private void definicion() {
+    private void definicion() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         // System.out.println(currentToken.getLexeme());
         if (currentToken.getKind() == TokenKind.NOTERMINAL) {
             String leftHandSide = currentToken.getLexeme();
@@ -50,9 +56,6 @@ public class GrammarParser extends SLRParser {
             match(TokenKind.EQ);
             listaReglas(leftHandSide);
             match(TokenKind.SEMICOLON);
-            
-            // Generar la tabla Goto
-            generarGotoTable();
         } else if (currentToken.getKind() == TokenKind.COMENTARIO) {
             parseComment();
         } else {
@@ -65,7 +68,7 @@ public class GrammarParser extends SLRParser {
         getNextToken();
     }
 
-    private void listaReglas(String leftHandSide) {
+    private void listaReglas(String leftHandSide) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         regla(leftHandSide);
         while (currentToken.getKind() == TokenKind.BAR) {
             match(TokenKind.BAR);
@@ -73,22 +76,31 @@ public class GrammarParser extends SLRParser {
         }
     }
 
-    private void regla(String leftHandSide) {
+    private void regla(String leftHandSide) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         List<String> rightHandSide = new ArrayList<>();
+        int n_right_elements = 0;
         while (currentToken.getKind() == TokenKind.NOTERMINAL || currentToken.getKind() == TokenKind.TERMINAL) {
             String symbol = currentToken.getLexeme();
             getNextToken();
             rightHandSide.add(symbol);
+            n_right_elements++;
         }
 
         // Verificar si ya existe una regla con el mismo lado izquierdo y lado derecho
         if (!ruleExists(leftHandSide, rightHandSide.toArray(new String[0]))) {
-            rules.add(new String[]{leftHandSide, String.join(" ", rightHandSide)});
+            rules_symbols.add(new String[]{leftHandSide, String.join(" ", rightHandSide)});
+            
+            
+            // Obtener el campo correspondiente a la variable en la interfaz
+            Field field = SymbolConstants.class.getField(leftHandSide);
+            // Obtener el valor int de la constante
+            int left_number = field.getInt(null);
+            rules.add(new int[]{left_number, n_right_elements});
         }
     }
 
     private boolean ruleExists(String leftHandSide, String[] rightHandSide) {
-        for (String[] rule : rules) {
+        for (String[] rule : rules_symbols) {
             if (rule[0].equals(leftHandSide) && Arrays.equals(rule[1].split(" "), rightHandSide)) {
                 return true;
             }
@@ -105,11 +117,11 @@ public class GrammarParser extends SLRParser {
         }
     }
 
-    // Métodos abstractos a implementar
+    // Métodos abstractos
 
     protected int rules_getRowCount() {
         // Implementación para obtener el número de filas en la tabla de reglas
-        return rules.size();
+        return rules_symbols.size();
     }
 
     protected int rules_getColumnCount() {
@@ -120,7 +132,7 @@ public class GrammarParser extends SLRParser {
     protected String getLeftHandSide(int row) {
         // Implementación para obtener el lado izquierdo de una regla en la tabla de reglas
         if (row >= 0 && row < rules_getRowCount()) {
-            return rules.get(row)[0];
+            return rules_symbols.get(row)[0];
         }
         return null;
     }
@@ -128,7 +140,7 @@ public class GrammarParser extends SLRParser {
     protected String[] getRightHandSide(int row) {
         // Implementación para obtener el lado derecho de una regla en la tabla de reglas
         if (row >= 0 && row < rules_getRowCount()) {
-            return rules.get(row)[1].split(" ");
+            return rules_symbols.get(row)[1].split(" ");
         }
         return null;
     }
@@ -155,26 +167,70 @@ public class GrammarParser extends SLRParser {
         return nonTerminals;
     }
     
-    
-    // Generar Tabla Goto    
-    private void generarGotoTable() {
-    	// Obtener los símbolos no terminales
-        List<String> nonTerminals = obtenerSimbolosNoTerminales();
-        
-        // Numero de estados
-        n_estados = 0;
-        
-        // Crear una matriz para la tabla Goto
-        gotoTable = new int[n_estados][nonTerminals.size()];
-
-        
+    private List<String> obtenerSimbolosTerminales() {
+        List<String> Terminals = new ArrayList<>();
+        try {
+            Class<?> tokenConstantsClass = Class.forName("generated.TokenConstants");
+            Field[] fields = tokenConstantsClass.getDeclaredFields();
+            for (Field field : fields) {
+                int modifiers = field.getModifiers();
+                if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && field.getType() == int.class) {
+                    Terminals.add(field.getName());
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return Terminals;
     }
+    
+    // Generar Tabla Goto
+    /*
+     * recorriendo cada regla de la gramática y asignando los valores adecuados 
+     * en la tabla. Se utiliza el índice del símbolo no terminal en la lista 
+     * nonTerminalSymbols como la columna en la tabla gotoTable. 
+     * El valor asignado es simplemente el índice de la regla más uno 
+     * (considerando que las reglas se numeran a partir de 1).
+     * */
+    private void initGotoTable() {
+    	List<String> nonTerminalSymbols = obtenerSimbolosNoTerminales();
+    	List<String> TerminalSymbols = obtenerSimbolosTerminales();
+        this.gotoTable = new int[rules_symbols.size()][nonTerminalSymbols.size()];
+
+        for (int i = 0; i < rules_symbols.size(); i++) {
+            String leftHandSide = getLeftHandSide(i);
+            int leftHandSideIndex = nonTerminalSymbols.indexOf(leftHandSide);
+
+            String[] rightHandSide = getRightHandSide(i); 
+            System.out.println(leftHandSide);
+            for (int j = 0; j < rightHandSide.length; j++) {
+            	System.out.println(rightHandSide[j]);
+                String symbol = rightHandSide[j];
+                int symbolIndex = nonTerminalSymbols.indexOf(symbol);
+                
+                if (symbolIndex != -1) {
+                	this.gotoTable[i][symbolIndex] = i + 1;
+                }
+                
+            }
+        }
+    }
+    
+    // Generar Tabla Goto
     
     
     // Devolver tablas
 
-    public String[][] getRules() {
-        String[][] rulesArray = new String[rules.size()][2];
+    public String[][] getRules_symbol() {
+        String[][] rulesArray = new String[rules_symbols.size()][2];
+        for (int i = 0; i < rules_symbols.size(); i++) {
+            rulesArray[i] = rules_symbols.get(i);
+        }
+        return rulesArray;
+    }
+    
+    public int[][] getRules() {
+        int[][] rulesArray = new int[rules.size()][2];
         for (int i = 0; i < rules.size(); i++) {
             rulesArray[i] = rules.get(i);
         }
@@ -185,12 +241,14 @@ public class GrammarParser extends SLRParser {
         return gotoTable;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         GrammarParser parser = new GrammarParser("Main.txt");
         parser.parse();
-        String[][] rules = parser.getRules();
+        int[][] rules = parser.getRules();
         System.out.println("Reglas:");
         System.out.println(Arrays.deepToString(rules));
+        
+        parser.initGotoTable();
 
         int[][] gotoTable = parser.getGotoTable();
         System.out.println("Tabla Goto:");
