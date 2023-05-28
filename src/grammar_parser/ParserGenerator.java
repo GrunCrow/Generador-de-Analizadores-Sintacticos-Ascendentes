@@ -8,8 +8,8 @@ public class ParserGenerator {
     private int[][] gotoTable;
     private int[][] ruleTable;
 
-    public ParserGenerator(ActionElement[][] actionTable, int[][] gotoTable, int[][] rules) {
-        this.actionTable = actionTable;
+    public ParserGenerator(int[][] gotoTable, int[][] rules) {
+        //this.actionTable = actionTable;
         this.gotoTable = gotoTable;
         this.ruleTable = rules;
     }
@@ -28,19 +28,19 @@ public class ParserGenerator {
             
             writer.write("     private void initRules() {\n");
             writer.write("     		int[][] initRule = {\n");
-            writeActionTable(writer);
+            writeRuleTable(writer);
             writer.write("          };\n");
             writer.write("    		this.rule = initRule;;\n");
             writer.write("    }\n\n");
             
             
             writer.write("     private void initActionTable() {\n");
-            writeGotoTable(writer);
+            writeActionTable(writer);
             writer.write("    }\n\n");
             
             
             writer.write("       private void initGotoTable() {\n");
-            writeRuleTable(writer);
+            writeGotoTable(writer);
             writer.write("    }\n\n");
 
             writer.write("}\n");
@@ -60,7 +60,14 @@ public class ParserGenerator {
 
 	
 	private void writeRuleTable(FileWriter writer) throws IOException {
-
+		int num_rows = ruleTable.length;
+		int i = 0;
+				
+		writer.write("     				{ 0, 0 } ,\n");
+		for(i = 0; i<num_rows-1;i++) {
+			writer.write("     				{ "); writer.write(ruleTable[i][0]); writer.write(", "); writer.write(ruleTable[i][1]); writer.write(" },\n");
+		}
+		writer.write("     				{ "); writer.write(ruleTable[i][0]); writer.write(", "); writer.write(ruleTable[i][1]); writer.write(" }\n");
 	}
 
 	

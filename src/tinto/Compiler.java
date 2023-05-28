@@ -5,6 +5,8 @@ import grammar_parser.*;
 import java.io.*;
 import java.util.List;
 
+import generated.Parser;
+
 public class Compiler {
 
     public static void main(String[] args) {
@@ -45,7 +47,7 @@ public class Compiler {
             
             ParserGenerator generator = new ParserGenerator(actions, gototable, rules);
             
-            // parserGenerator.generateParsingTable(rules);
+            generator.generateParsingTable("src/generated/Parser.java");
 
             // Crear instancia del analizador sintáctico
             Parser parserInstance  = new Parser();

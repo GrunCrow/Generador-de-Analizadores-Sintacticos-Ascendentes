@@ -30,7 +30,7 @@ public abstract class SLRParser {
 	protected int[][] rules;
     protected static final int COLUMN_COUNT = 2; // Número de columnas en la tabla de reglas
 	
-	protected boolean parse(Lexer lexer) throws SintaxException, IOException
+	public boolean parse(Lexer lexer) throws SintaxException, IOException
 	{
 		// ejecuto lexer
 		this.lexer = lexer;

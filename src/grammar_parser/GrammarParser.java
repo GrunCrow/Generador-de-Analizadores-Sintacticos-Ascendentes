@@ -193,28 +193,26 @@ public class GrammarParser extends SLRParser {
      * (considerando que las reglas se numeran a partir de 1).
      * */
     private void initGotoTable() {
-    	List<String> nonTerminalSymbols = obtenerSimbolosNoTerminales();
-    	List<String> TerminalSymbols = obtenerSimbolosTerminales();
-        this.gotoTable = new int[rules_symbols.size()][nonTerminalSymbols.size()];
+        List<String> nonTerminalSymbols = obtenerSimbolosNoTerminales();
+        this.gotoTable = new int[rules.size()][nonTerminalSymbols.size()];
 
-        for (int i = 0; i < rules_symbols.size(); i++) {
+        for (int i = 0; i < rules.size(); i++) {
             String leftHandSide = getLeftHandSide(i);
             int leftHandSideIndex = nonTerminalSymbols.indexOf(leftHandSide);
 
-            String[] rightHandSide = getRightHandSide(i); 
-            System.out.println(leftHandSide);
+            String[] rightHandSide = getRightHandSide(i);
+
             for (int j = 0; j < rightHandSide.length; j++) {
-            	System.out.println(rightHandSide[j]);
                 String symbol = rightHandSide[j];
                 int symbolIndex = nonTerminalSymbols.indexOf(symbol);
-                
+
                 if (symbolIndex != -1) {
-                	this.gotoTable[i][symbolIndex] = i + 1;
+                    this.gotoTable[i][symbolIndex] = i + 1;
                 }
-                
             }
         }
     }
+
     
     // Generar Tabla Goto
     
