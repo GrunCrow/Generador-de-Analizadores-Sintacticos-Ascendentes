@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.util.Stack;
 
 /**
- * Clase que desarrolla el comportamiento común de los analizadores
- * sintácticos ascendentes basados en tablas SLR
+ * Clase que desarrolla el comportamiento comï¿½n de los analizadores
+ * sintï¿½cticos ascendentes basados en tablas SLR
  *
  */
 
-// programacion generica del algoritmo de desplazamiento - reducción
+// programacion generica del algoritmo de desplazamiento - reducciï¿½n
 
 public abstract class SLRParser {
 
@@ -20,7 +20,7 @@ public abstract class SLRParser {
 
 	private Stack<Integer> stack;
 	
-	// protected porque cuando hagamos tintoparser lo extenderá dandole contenido 
+	// protected porque cuando hagamos tintoparser lo extenderï¿½ dandole contenido 
 	//a las variables y campos como protected
 	// los hijos pueden acceder a ellos
 	protected ActionElement[][] actionTable;
@@ -38,19 +38,19 @@ public abstract class SLRParser {
 		// construyo la pila
 		this.stack = new Stack<Integer>();
 		// apilo el estado 0
-		//this.stack.push(new Integer(0)); // lo cambiaron en una versión de java y da error, cambiar a como en la siguiente linea
+		//this.stack.push(new Integer(0)); // lo cambiaron en una versiï¿½n de java y da error, cambiar a como en la siguiente linea
 		this.stack.push(Integer.valueOf(0));
 		while(true) {
-			// una iteración, true si es aceptar, false si desplazar o reducir, 
-			//al llegar al 2º aceptar, para, así encadenamos pasos del algoritmo 
-			//(o si encontramos una excepcion que lanzará step, y saldremos de oparser 
-			//lanzando una excepción
+			// una iteraciï¿½n, true si es aceptar, false si desplazar o reducir, 
+			//al llegar al 2ï¿½ aceptar, para, asï¿½ encadenamos pasos del algoritmo 
+			//(o si encontramos una excepcion que lanzarï¿½ step, y saldremos de oparser 
+			//lanzando una excepciï¿½n
 			if(step()) break;
 		}
 		return true;
 	}
 	
-	private void shiftAction(ActionElement action) throws IOException 
+	protected void shiftAction(ActionElement action) throws IOException 
 	{
 		lexer.getNextToken();
 		nextToken = lexer.getCurrentToken();
@@ -59,8 +59,8 @@ public abstract class SLRParser {
 	}
 	
 
-	// Reducción
-	private void reduceAction(ActionElement action) 
+	// Reducciï¿½n
+	protected void reduceAction(ActionElement action) 
 	{
 		int ruleIndex = action.getValue();
 		
@@ -86,7 +86,7 @@ public abstract class SLRParser {
 	private boolean step() throws SintaxException, IOException 
 	{
 		int state = ((Integer) stack.lastElement()).intValue();
-		// de la tabla de acción action es la acción a ejecutar
+		// de la tabla de acciï¿½n action es la acciï¿½n a ejecutar
 		ActionElement action = actionTable[state][nextToken.getKind()];
 		
 		// este if es un error, que es el caso de que action sea null -> lanzar excepcion

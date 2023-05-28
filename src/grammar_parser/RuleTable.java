@@ -25,6 +25,10 @@ public class RuleTable {
     public Rule getRule(int row, int column) {
         return table[row][column];
     }
+    
+    public Rule[] getRulebyRow(int row) {
+        return table[row];
+    }
 
     public int getRowCount() {
         return rowCount;

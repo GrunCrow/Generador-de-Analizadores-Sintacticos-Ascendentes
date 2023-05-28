@@ -2,11 +2,17 @@ package grammar_parser;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Stack;
 
-public class GrammarParser {
+import generated.SymbolConstants;
+import generated.TokenConstants;
+
+public class GrammarParser extends SLRParser{
     private Lexer lexer;
     private Token currentToken;
     private RuleTable ruleTable;
+    private ActionTable actionTable;
+    private GotoTable gotoTable;
 
     public GrammarParser(String filePath) {
         try {
@@ -16,6 +22,8 @@ public class GrammarParser {
         }
         getNextToken();
         ruleTable = new RuleTable(); // Inicializar con una tabla vacía
+        actionTable = new ActionTable(); // Inicializar con una tabla vacía
+        gotoTable = new GotoTable(); // Inicializar con una tabla vacía
     }
 
     private void getNextToken() {
@@ -55,10 +63,10 @@ public class GrammarParser {
     }
 
     private void listaReglas(String leftHandSide) {
-        regla(leftHandSide);
-        while (currentToken.getKind() == TokenKind.BAR) {
-            match(TokenKind.BAR);
+        // regla(leftHandSide);
+        while (currentToken.getKind() != TokenKind.SEMICOLON) {     
             regla(leftHandSide);
+            match(TokenKind.BAR);
         }
     }
 
@@ -121,9 +129,84 @@ public class GrammarParser {
         return ruleTable.getColumnCount(); // Si no se encuentra el rightHandSide en la tabla de reglas
     }
     
+    
+    private int getTokenCount() {
+        int maxToken = -1;
+        
+        // Itera sobre los campos de la interfaz TokenConstants
+        // para encontrar el máximo valor de categoría léxica (token)
+        Class<TokenConstants> tokenConstantsClass = TokenConstants.class;
+        java.lang.reflect.Field[] fields = tokenConstantsClass.getDeclaredFields();
+        for (java.lang.reflect.Field field : fields) {
+            if (field.getType() == int.class) {
+                try {
+                    int tokenValue = field.getInt(null);
+                    if (tokenValue > maxToken) {
+                        maxToken = tokenValue;
+                    }
+                } catch (IllegalAccessException e) {
+                    // Manejo de excepciones si es necesario
+                }
+            }
+        }
+        
+        // El número de columnas es el máximo valor de categoría léxica (token) + 1
+        return maxToken + 1;
+    }
+    
+    private int getSymbolCount() {
+        int maxSymbol = -1;
+        
+        // Itera sobre los campos de la interfaz TokenConstants
+        // para encontrar el máximo valor de categoría léxica (token)
+        Class<SymbolConstants> SymbolConstantsClass = SymbolConstants.class;
+        java.lang.reflect.Field[] fields = SymbolConstantsClass.getDeclaredFields();
+        for (java.lang.reflect.Field field : fields) {
+            if (field.getType() == int.class) {
+                try {
+                    int symbolValue = field.getInt(null);
+                    if (symbolValue > maxSymbol) {
+                    	maxSymbol = symbolValue;
+                    }
+                } catch (IllegalAccessException e) {
+                    // Manejo de excepciones si es necesario
+                }
+            }
+        }
+        
+        // El número de columnas es el máximo valor de categoría léxica (token) + 1
+        return maxSymbol + 1;
+    }
+    
+    
+	
+
+
+    private GotoTable getGoto(int state, int symbol) {
+        return gotoTable;
+    }
+
+    
+    
+    
+    
     public RuleTable getRulesTable() {
     	return ruleTable;
     }
+    
+    
+    public ActionTable getActionsTable() {
+    	return actionTable;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     private void match(int expectedTokenKind) {
         if (currentToken != null && currentToken.getKind() == expectedTokenKind) {
