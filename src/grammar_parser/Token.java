@@ -3,21 +3,19 @@ package grammar_parser;
 import grammar_parser.Token;
 
 /**
- * Clase que describe un componente léxico
- *  
- * * @author Francisco José Moreno Velo
- *
+ * Clase que describe un componente lexico
  */
+
 public class Token {
 	
 	/**
-	 * Constante que identifica la categoría léxica de final de entrada
+	 * Constante que identifica la categoria lexica de final de entrada
 	 */
 	public static final int EOF = 0;
 	
 	/**
-	 * Tipo de componente léxico.
-	 * Identificador de la categoría léxica del componente.
+	 * Tipo de componente lexico.
+	 * Identificador de la categoria lexica del componente.
 	 */
 	private int kind;
 	
@@ -27,19 +25,19 @@ public class Token {
 	private String lexeme;
 	
 	/**
-	 * Número de fila en la que se encuentra el inicio del componente
+	 * Nï¿½mero de fila en la que se encuentra el inicio del componente
 	 */
 	private int row;
 	
 	/**
-	 * Número de columna en la que se encuentra el inicio del componente
+	 * Nï¿½mero de columna en la que se encuentra el inicio del componente
 	 */
 	private int column;
 	
 	
 	/**
 	 * Constructor
-	 * @param kind Identificador de la categoría léxica
+	 * @param kind Identificador de la categorï¿½a lï¿½xica
 	 * @param lexeme Lexema que origina el componente
 	 * @param row Fila en la que comienza el componente
 	 * @param column Columna en la que comienza el componente
@@ -72,7 +70,7 @@ public class Token {
     }
 	
 	/**
-	 * Obtiene el identificador de categoría
+	 * Obtiene el identificador de categorï¿½a
 	 * @return Tipo de componente
 	 */
 	public int getKind() 
@@ -108,7 +106,7 @@ public class Token {
 	}
 	
 	/**
-	 * Obtiene una descripción del Token
+	 * Obtiene una descripciï¿½n del Token
 	 */
 	public String toString() 
 	{
