@@ -6,12 +6,12 @@ import java.io.IOException;
 public class ParserGenerator {
     private int[][] actionTable;
     private int[][] gotoTable;
-    private int[][] ruleTable;
+    private String[][] ruleTable;
 
-    public ParserGenerator(int[][] actionTable, int[][] gotoTable, int[][] rule) {
+    public ParserGenerator(int[][] actionTable, int[][] gotoTable, String[][] rules) {
         this.actionTable = actionTable;
         this.gotoTable = gotoTable;
-        this.ruleTable = rule;
+        this.ruleTable = rules;
     }
 
     public void generateParser(String outputFilePath) {
