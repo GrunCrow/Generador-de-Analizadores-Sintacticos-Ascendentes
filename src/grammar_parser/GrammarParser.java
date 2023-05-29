@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
+import ATS_Tree.ASTNode;
 import generated.SymbolConstants;
 import generated.TokenConstants;
 
@@ -21,6 +22,8 @@ public class GrammarParser extends SLRParser {
 
     protected List<String> nonTerminals;
     protected List<String> Terminals;
+    
+    ASTNode root;
 
     public GrammarParser(String filePath) {
         try {
@@ -33,6 +36,9 @@ public class GrammarParser extends SLRParser {
         rules_symbols = new ArrayList<>();
         rules = new ArrayList<>();
         gotoTable = new int[0][0];
+        actionTable = new ActionElement[0][0];
+        
+        root = new ASTNode("ROOT");
     }
 
     private void getNextToken() {
@@ -165,12 +171,36 @@ public class GrammarParser extends SLRParser {
         if (!ruleExists(leftHandSide, rightHandSide.toArray(new String[0]))) {
             rules_symbols.add(new String[]{leftHandSide, String.join(" ", rightHandSide)});
             
-            
             // Obtener el campo correspondiente a la variable en la interfaz
             Field field = SymbolConstants.class.getField(leftHandSide);
             // Obtener el valor int de la constante
             int left_number = field.getInt(null);
             rules.add(new int[]{left_number, n_right_elements});
+            
+            // Crear un nuevo nodo para la regla en el árbol AST
+            ASTNode ruleNode = new ASTNode(leftHandSide);
+            
+            // Crear nodos para los símbolos del lado derecho y agregarlos como hijos del nodo de la regla
+            for (String symbol : rightHandSide) {
+                ASTNode symbolNode = new ASTNode(symbol);
+                ruleNode.addChild(symbolNode);
+            }
+            
+            // Realizar el análisis SLR para construir el árbol AST
+            //analyzeSLR(ruleNode);
+            
+			// Agregar el nodo de la regla al árbol AST
+            root.addChild(ruleNode);
+        }
+    }
+    private void printAST(ASTNode node, int level) {
+        StringBuilder indent = new StringBuilder();
+        for (int i = 0; i < level; i++) {
+            indent.append("  ");
+        }
+        System.out.println(indent.toString() + node.getLabel());
+        for (ASTNode child : node.getChildren()) {
+            printAST(child, level + 1);
         }
     }
 
@@ -319,6 +349,8 @@ public class GrammarParser extends SLRParser {
         int[][] rules = parser.getRules();
         System.out.println("Reglas:");
         System.out.println(Arrays.deepToString(rules));
+        
+        parser.printAST(parser.root, 0);
         
         ActionElement[][] Actiontable = parser.getActionsTable();
         System.out.println("Tabla ActionTable:");
