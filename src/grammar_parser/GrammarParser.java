@@ -70,13 +70,13 @@ public class GrammarParser extends SLRParser {
         if (currentToken.getKind() == TokenKind.NOTERMINAL) {
             String leftHandSide = currentToken.getLexeme();
             
-            ASTNode ruleNode = new ASTNode(leftHandSide); // Crear un nodo para la regla
-            ast.addChild(ruleNode); // Agregar el nodo al árbol
+            //ASTNode ruleNode = new ASTNode(leftHandSide); // Crear un nodo para la regla
+            // ast.addChild(ruleNode); // Agregar el nodo al árbol
             
             match(TokenKind.NOTERMINAL);
             match(TokenKind.EQ);
             
-            listaReglas(ruleNode);
+            listaReglas(leftHandSide);
             match(TokenKind.SEMICOLON);
         } else if (currentToken.getKind() == TokenKind.COMENTARIO) {
             parseComment();
@@ -202,15 +202,16 @@ public class GrammarParser extends SLRParser {
     //									Reglas
     // ======================================================================================
 
-    private void listaReglas(ASTNode parent) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-        regla(parent);
+    private void listaReglas(String leftHandSide) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+        regla(leftHandSide);
         while (currentToken.getKind() == TokenKind.BAR) {
             match(TokenKind.BAR);
-            regla(parent);
+            regla(leftHandSide);
         }
     }
-
-    private void regla(ASTNode parent) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    
+    
+    private void regla(String leftHandSide) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         List<String> rightHandSide = new ArrayList<>();
         int n_right_elements = 0;
         while (currentToken.getKind() == TokenKind.NOTERMINAL || currentToken.getKind() == TokenKind.TERMINAL) {
@@ -220,33 +221,32 @@ public class GrammarParser extends SLRParser {
             n_right_elements++;
         }
 
-        // Verificar si ya existe una regla con el mismo lado izquierdo
-        int ruleIndex = findRuleIndex(parent.getLabel(), rightHandSide);
-        if (ruleIndex == -1) {
-            ruleIndex = rules_symbols.size(); // Asignar un nuevo índice para la regla
-
-            // Agregar el lado izquierdo y derecho de la regla a las listas correspondientes
-            rules_symbols.add(rightHandSide.toArray(new String[0]));
-            rules.add(new int[n_right_elements + 1]);
-            rules.get(ruleIndex)[0] = getNonTerminalIndex(parent.getLabel());
-        }
-
-        // Agregar el nodo de la regla como hijo del nodo padre en el árbol de sintaxis abstracta
-        ASTNode ruleNode = new ASTNode(Arrays.toString(rules_symbols.get(ruleIndex)));
-        parent.addChild(ruleNode);
-
-        // Crear y agregar los nodos terminales y no terminales como hijos del nodo de la regla
-        for (String symbol : rightHandSide) {
-            ASTNode symbolNode;
-            if (isNonTerminal(symbol)) {
-                symbolNode = new ASTNode(symbol);
-            } else {
-                symbolNode = new ASTNode("'" + symbol + "'");
+        // Verificar si ya existe una regla con el mismo lado izquierdo y lado derecho
+        if (!ruleExists(leftHandSide, rightHandSide.toArray(new String[0]))) {
+            rules_symbols.add(new String[]{leftHandSide, String.join(" ", rightHandSide)});
+            
+            // Obtener el campo correspondiente a la variable en la interfaz
+            Field field = SymbolConstants.class.getField(leftHandSide);
+            // Obtener el valor int de la constante
+            int left_number = field.getInt(null);
+            rules.add(new int[]{left_number, n_right_elements});
+            
+            // Crear un nuevo nodo para la regla en el árbol AST
+            ASTNode ruleNode = new ASTNode(leftHandSide);
+            
+            // Crear nodos para los símbolos del lado derecho y agregarlos como hijos del nodo de la regla
+            for (String symbol : rightHandSide) {
+                ASTNode symbolNode = new ASTNode(symbol);
+                ruleNode.addChild(symbolNode);
             }
-            ruleNode.addChild(symbolNode);
+            
+            // Agregar el nodo de la regla al árbol AST
+            ast.addChild(ruleNode);
         }
-        // match(TokenKind.SEMICOLON);
     }
+
+
+    
     
     private int findRuleIndex(String leftHandSide, List<String> rightHandSide) {
         for (int i = 0; i < rules_symbols.size(); i++) {
@@ -310,15 +310,15 @@ public class GrammarParser extends SLRParser {
     //									ActionTable
     // ===========================================================================
     
-    /*public int countStates(ASTNode node) {
+    public int countStates(ASTNode node) {
         int count = 1; // Contar el nodo actual
 
         // Recorrer los hijos del nodo actual y contar los nodos en cada uno
         for (ASTNode child : node.getChildren()) {
             count += countStates(child);
         }
-
         return count;
+        
     }
     
     private Set<String> getFirstSet(ASTNode state) {
@@ -461,7 +461,7 @@ public class GrammarParser extends SLRParser {
                 actionTable[i][column] = new ActionElement(ActionElement.ACCEPT, -1);
             }
         }
-    }*/
+    }
 
 
     
@@ -568,18 +568,22 @@ public class GrammarParser extends SLRParser {
         System.out.println("Reglas:");
         System.out.println(Arrays.deepToString(rules));
         
-        // parser.initGotoTable();
-        //parser.generateActionTable();
         
+        
+        System.out.println(parser.countStates(parser.ast));
         ActionElement[][] actionTable = parser.getActionsTable();
         System.out.println("Tabla ActionTable:");
         System.out.println(Arrays.deepToString(actionTable));
+        
+        
+        // parser.initGotoTable();
+        //parser.generateActionTable();
         
         int[][] gotoTable = parser.getGotoTable();
         System.out.println("Tabla Goto:");
         System.out.println(Arrays.deepToString(gotoTable));
         
         // Imprimir el árbol de sintaxis abstracta
-        // parser.printAST(parser.ast, 0);
+        //parser.printAST(parser.ast, 0);
     }
 }
