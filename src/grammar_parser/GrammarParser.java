@@ -19,6 +19,8 @@ public class GrammarParser extends SLRParser {
     protected List<String[]> rules_symbols;
     protected List<int[]> rules;
 
+    protected List<String> nonTerminals;
+    protected List<String> Terminals;
 
     public GrammarParser(String filePath) {
         try {
@@ -43,7 +45,10 @@ public class GrammarParser extends SLRParser {
     }
 
     public void parse() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-        while (currentToken != null) {
+    	nonTerminals = obtenerSimbolosNoTerminales();
+    	Terminals = obtenerSimbolosTerminales();
+    	
+    	while (currentToken != null) {
             definicion();
         }
         initGotoTable();
@@ -199,6 +204,16 @@ public class GrammarParser extends SLRParser {
     
     
     
+    
+    
+    
+    
+    
+    /** ========================================================================
+     * 										GoToTable
+     * ========================================================================
+     * **/
+    
     // Generar Tabla Goto
     /*
      * recorriendo cada regla de la gramática y asignando los valores adecuados 
@@ -304,6 +319,10 @@ public class GrammarParser extends SLRParser {
         int[][] rules = parser.getRules();
         System.out.println("Reglas:");
         System.out.println(Arrays.deepToString(rules));
+        
+        ActionElement[][] Actiontable = parser.getActionsTable();
+        System.out.println("Tabla ActionTable:");
+        System.out.println(Arrays.deepToString(Actiontable));
         
         parser.initGotoTable();
 
