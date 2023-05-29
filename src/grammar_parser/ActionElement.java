@@ -2,13 +2,15 @@
 package grammar_parser;
 
 /**
- * Elemento de la tabla de acción
+ * Elemento de la tabla de acciï¿½n
  *
  */
 public class ActionElement {
 	
 	// tipos de acciones posibles
-
+	
+	public static final int ERROR = -1;
+	
 	/**
 	 * Constante que identifica un elemento de tipo aceptar
 	 */

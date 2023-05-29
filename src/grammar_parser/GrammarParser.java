@@ -5,10 +5,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
+import ATS_Tree.ASTNode;
 import generated.SymbolConstants;
 import generated.TokenConstants;
 
@@ -18,7 +20,13 @@ public class GrammarParser extends SLRParser {
 
     protected List<String[]> rules_symbols;
     protected List<int[]> rules;
-
+    
+    protected ActionElement[][] actionTable;
+    protected List<String> nonTerminals;
+    protected List<String> Terminals;
+    
+    private ASTNode ast;
+    protected int[][] gotoTable; // Tabla Goto
 
     public GrammarParser(String filePath) {
         try {
@@ -30,6 +38,7 @@ public class GrammarParser extends SLRParser {
 
         rules_symbols = new ArrayList<>();
         rules = new ArrayList<>();
+
         gotoTable = new int[0][0];
     }
 
@@ -43,19 +52,31 @@ public class GrammarParser extends SLRParser {
     }
 
     public void parse() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-        while (currentToken != null) {
+    	ast = new ASTNode("ROOT"); // Crear un nodo raíz para el árbol de sintaxis abstracta
+    	nonTerminals = obtenerSimbolosNoTerminales();
+    	Terminals = obtenerSimbolosTerminales();
+    	while (currentToken != null) {
             definicion();
         }
-        initGotoTable();
+        //initGotoTable();
+        
+        // Imprimir el árbol de sintaxis abstracta
+        //printAST(ast, 0);
+        
     }
 
     private void definicion() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         // System.out.println(currentToken.getLexeme());
         if (currentToken.getKind() == TokenKind.NOTERMINAL) {
             String leftHandSide = currentToken.getLexeme();
+            
+            ASTNode ruleNode = new ASTNode(leftHandSide); // Crear un nodo para la regla
+            ast.addChild(ruleNode); // Agregar el nodo al árbol
+            
             match(TokenKind.NOTERMINAL);
             match(TokenKind.EQ);
-            listaReglas(leftHandSide);
+            
+            listaReglas(ruleNode);
             match(TokenKind.SEMICOLON);
         } else if (currentToken.getKind() == TokenKind.COMENTARIO) {
             parseComment();
@@ -68,47 +89,17 @@ public class GrammarParser extends SLRParser {
         // Ignorar el comentario y obtener el siguiente token
         getNextToken();
     }
+    
+    
+    
+    
+    // ======================================================================================
+    //									Auxiliares
+    // ===========================================================================
 
-    private void listaReglas(String leftHandSide) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-        regla(leftHandSide);
-        while (currentToken.getKind() == TokenKind.BAR) {
-            match(TokenKind.BAR);
-            regla(leftHandSide);
-        }
-    }
-
-    private void regla(String leftHandSide) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-        List<String> rightHandSide = new ArrayList<>();
-        int n_right_elements = 0;
-        while (currentToken.getKind() == TokenKind.NOTERMINAL || currentToken.getKind() == TokenKind.TERMINAL) {
-            String symbol = currentToken.getLexeme();
-            getNextToken();
-            rightHandSide.add(symbol);
-            n_right_elements++;
-        }
-
-        // Verificar si ya existe una regla con el mismo lado izquierdo y lado derecho
-        if (!ruleExists(leftHandSide, rightHandSide.toArray(new String[0]))) {
-            rules_symbols.add(new String[]{leftHandSide, String.join(" ", rightHandSide)});
-            
-            
-            // Obtener el campo correspondiente a la variable en la interfaz
-            Field field = SymbolConstants.class.getField(leftHandSide);
-            // Obtener el valor int de la constante
-            int left_number = field.getInt(null);
-            rules.add(new int[]{left_number, n_right_elements});
-        }
-    }
-
-    private boolean ruleExists(String leftHandSide, String[] rightHandSide) {
-        for (String[] rule : rules_symbols) {
-            if (rule[0].equals(leftHandSide) && Arrays.equals(rule[1].split(" "), rightHandSide)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    
+    
+    
     private void match(int expectedKind) {
         if (currentToken.getKind() == expectedKind) {
             getNextToken();
@@ -185,7 +176,324 @@ public class GrammarParser extends SLRParser {
         return Terminals;
     }
     
-    // Generar Tabla Goto
+    private int getNonTerminalIndex(String nonTerminal) {
+        return nonTerminals.indexOf(nonTerminal);
+    }
+
+    private int getTerminalIndex(String terminal) {
+        return Terminals.indexOf(terminal);
+    }
+    
+    private boolean isNonTerminal(String symbol) {
+        return nonTerminals.contains(symbol);
+    }
+    
+    private boolean isTerminal(String symbol) {
+        return Terminals.contains(symbol);
+    }
+    
+    
+    
+    
+    
+    
+    
+    // ======================================================================================
+    //									Reglas
+    // ===========================================================================
+
+    private void listaReglas(ASTNode parent) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+        regla(parent);
+        while (currentToken.getKind() == TokenKind.BAR) {
+            match(TokenKind.BAR);
+            regla(parent);
+        }
+    }
+
+    private void regla(ASTNode parent) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+        List<String> rightHandSide = new ArrayList<>();
+        int n_right_elements = 0;
+        while (currentToken.getKind() == TokenKind.NOTERMINAL || currentToken.getKind() == TokenKind.TERMINAL) {
+            String symbol = currentToken.getLexeme();
+            getNextToken();
+            rightHandSide.add(symbol);
+            n_right_elements++;
+        }
+
+        // Verificar si ya existe una regla con el mismo lado izquierdo
+        int ruleIndex = findRuleIndex(parent.getLabel(), rightHandSide);
+        if (ruleIndex == -1) {
+            ruleIndex = rules_symbols.size(); // Asignar un nuevo índice para la regla
+
+            // Agregar el lado izquierdo y derecho de la regla a las listas correspondientes
+            rules_symbols.add(rightHandSide.toArray(new String[0]));
+            rules.add(new int[n_right_elements + 1]);
+            rules.get(ruleIndex)[0] = getNonTerminalIndex(parent.getLabel());
+        }
+
+        // Agregar el nodo de la regla como hijo del nodo padre en el árbol de sintaxis abstracta
+        ASTNode ruleNode = new ASTNode(Arrays.toString(rules_symbols.get(ruleIndex)));
+        parent.addChild(ruleNode);
+
+        // Crear y agregar los nodos terminales y no terminales como hijos del nodo de la regla
+        for (String symbol : rightHandSide) {
+            ASTNode symbolNode;
+            if (isNonTerminal(symbol)) {
+                symbolNode = new ASTNode(symbol);
+            } else {
+                symbolNode = new ASTNode("'" + symbol + "'");
+            }
+            ruleNode.addChild(symbolNode);
+        }
+        // match(TokenKind.SEMICOLON);
+    }
+    
+    private int findRuleIndex(String leftHandSide, List<String> rightHandSide) {
+        for (int i = 0; i < rules_symbols.size(); i++) {
+            String[] symbols = rules_symbols.get(i);
+            if (symbols.length == rightHandSide.size() && symbols[0].equals(leftHandSide)) {
+                boolean match = true;
+                for (int j = 0; j < rightHandSide.size(); j++) {
+                    if (!symbols[j + 1].equals(rightHandSide.get(j))) {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    private boolean ruleExists(String leftHandSide, String[] rightHandSide) {
+        for (String[] rule : rules_symbols) {
+            if (rule[0].equals(leftHandSide) && Arrays.equals(rule[1].split(" "), rightHandSide)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int getRuleIndex(String symbol) {
+        // Recorrer las definiciones en el árbol AST
+        for (ASTNode definition : ast.getChildren()) {
+            // Obtener el símbolo no terminal de la definición
+            String nonTerminal = definition.getChildren().get(0).getLabel();
+
+            // Verificar si el símbolo coincide con el símbolo no terminal de la definición
+            if (symbol.equals(nonTerminal)) {
+                // Devolver el índice de la definición como índice de regla
+                return ast.getChildren().indexOf(definition);
+            }
+        }
+
+        // Si no se encuentra una definición correspondiente, devolver -1
+        return -1;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // ======================================================================================
+    //									ActionTable
+    // ===========================================================================
+    
+    public int countStates(ASTNode node) {
+        int count = 1; // Contar el nodo actual
+
+        // Recorrer los hijos del nodo actual y contar los nodos en cada uno
+        for (ASTNode child : node.getChildren()) {
+            count += countStates(child);
+        }
+
+        return count;
+    }
+    
+    private Set<String> getFirstSet(ASTNode state) {
+        Set<String> firstSet = new HashSet<>();
+
+        // Obtener los hijos directos del estado actual
+        List<ASTNode> children = state.getChildren();
+
+        for (ASTNode child : children) {
+            // Verificar si el hijo es un símbolo no terminal
+            if (!isTerminal(child.getLabel())) {
+                // Obtener el conjunto FIRST para el símbolo no terminal
+                Set<String> childFirstSet = getFirstSet(child);
+
+                // Agregar los elementos del conjunto FIRST del hijo al conjunto FIRST del estado actual
+                firstSet.addAll(childFirstSet);
+            } else {
+                // El hijo es un símbolo terminal, agregarlo al conjunto FIRST del estado actual
+                firstSet.add(child.getLabel());
+            }
+        }
+
+        return firstSet;
+    }
+    
+    private Set<String> getFollowSet(ASTNode state) {
+        Set<String> followSet = new HashSet<>();
+
+        // Obtener el padre del estado actual
+        ASTNode parent = state.getParent();
+
+        // Verificar si el estado actual es el hijo derecho de su padre
+        boolean isRightChild = (parent != null && parent.getChildren().indexOf(state) == parent.getChildren().size() - 1);
+
+        if (isRightChild) {
+            // El estado actual es el hijo derecho de su padre, obtener el conjunto FOLLOW para el padre
+            followSet = getFollowSet(parent);
+        } else {
+            // El estado actual no es el hijo derecho de su padre, buscar el siguiente hermano del estado actual
+            ASTNode sibling = state.getNextSibling();
+
+            while (sibling != null) {
+                // Obtener el conjunto FIRST para el siguiente hermano
+                Set<String> siblingFirstSet = getFirstSet(sibling);
+
+                // Agregar los elementos del conjunto FIRST del siguiente hermano al conjunto FOLLOW del estado actual
+                followSet.addAll(siblingFirstSet);
+
+                // Buscar el siguiente hermano
+                sibling = sibling.getNextSibling();
+            }
+
+            // Si no se encontró ningún siguiente hermano, obtener el conjunto FOLLOW para el padre del estado actual
+            if (sibling == null) {
+                followSet.addAll(getFollowSet(parent));
+            }
+        }
+
+        return followSet;
+    }
+    
+    private int getNextState(ASTNode state, String symbol) {
+        List<ASTNode> children = state.getChildren();
+
+        // Buscar el nodo hijo correspondiente al símbolo de entrada
+        for (ASTNode child : children) {
+            if (child.getLabel().equals(symbol)) {
+                // Obtener el índice del estado hijo
+                return child.getIndex();
+            }
+        }
+
+        // Si no se encuentra el símbolo de entrada en los hijos, devolver -1 (estado inválido)
+        return -1;
+    }
+
+    private String getFinalSymbolFromAST(ASTNode root) {
+        // Recorrer el árbol AST hasta encontrar el último nodo terminal
+        ASTNode currentNode = root;
+        while (!currentNode.getChildren().isEmpty()) {
+            List<ASTNode> children = currentNode.getChildren();
+            currentNode = children.get(children.size() - 1);
+        }
+
+        // Devolver el nombre del último nodo terminal como símbolo final
+        return currentNode.getLabel();
+    }
+    
+    private boolean isFinalState(ASTNode state) {
+        // Un estado final es aquel en el que no tiene hijos, es decir, es un nodo terminal
+        return state.getChildren().isEmpty();
+    }
+    
+    private void generateActionTable() {
+        ASTNode root = ast;
+        int numStates = countStates(root);
+        int numTerminals = Terminals.size();
+        int numNonTerminals = nonTerminals.size();
+
+        actionTable = new ActionElement[numStates][numTerminals + numNonTerminals];
+
+        // Inicializar la tabla de acciones con elementos de tipo ERROR
+        for (int i = 0; i < numStates; i++) {
+            for (int j = 0; j < numTerminals + numNonTerminals; j++) {
+                actionTable[i][j] = new ActionElement(ActionElement.ERROR, -1);
+            }
+        }
+
+        // Generar las acciones SHIFT y REDUCE en la tabla de acciones
+        for (int i = 0; i < numStates; i++) {
+            // Obtener el conjunto FIRST y FOLLOW para el estado actual
+            Set<String> firstSet = getFirstSet(root);
+            Set<String> followSet = getFollowSet(root);
+
+            // Calcular las acciones SHIFT y REDUCE para cada símbolo en el estado actual
+            for (String symbol : firstSet) {
+                if (isTerminal(symbol)) {
+                    // Es un símbolo terminal, calcular el índice de columna correspondiente
+                    int column = getTerminalIndex(symbol);
+
+                    // Agregar la acción SHIFT a la tabla de acciones
+                    int nextState = getNextState(root, symbol);
+                    actionTable[i][column] = new ActionElement(ActionElement.SHIFT, nextState);
+                }
+            }
+
+            // Agregar las acciones REDUCE para los símbolos no terminales en el estado actual
+            for (String symbol : nonTerminals) {
+                int column = getNonTerminalIndex(symbol);
+                int ruleIndex = getRuleIndex(symbol);
+                actionTable[i][column] = new ActionElement(ActionElement.REDUCE, ruleIndex);
+            }
+            
+            // Obtener el símbolo final de entrada desde el árbol AST
+            String finalSymbol = getFinalSymbolFromAST(root);
+            
+            // Agregar la acción ACCEPT si el estado actual es el estado final
+            if (isFinalState(root)) {
+                int column = getTerminalIndex(finalSymbol); // EOF_SYMBOL representa el símbolo de fin de entrada
+                actionTable[i][column] = new ActionElement(ActionElement.ACCEPT, -1);
+            }
+        }
+    }
+
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // ======================================================================================
+    //									GotoTabla
+    // ===========================================================================
+    
+    private void printAST(ASTNode node, int level) {
+        StringBuilder indent = new StringBuilder();
+        for (int i = 0; i < level; i++) {
+            indent.append("  ");
+        }
+        System.out.println(indent.toString() + node.getLabel());
+        for (ASTNode child : node.getChildren()) {
+            printAST(child, level + 1);
+        }
+    }
+    
     /*
      * recorriendo cada regla de la gramática y asignando los valores adecuados 
      * en la tabla. Se utiliza el índice del símbolo no terminal en la lista 
@@ -193,27 +501,34 @@ public class GrammarParser extends SLRParser {
      * El valor asignado es simplemente el índice de la regla más uno 
      * (considerando que las reglas se numeran a partir de 1).
      * */
-    private void initGotoTable() {
-        List<String> nonTerminalSymbols = obtenerSimbolosNoTerminales();
-        List<String> TerminalSymbols = obtenerSimbolosTerminales();
-        this.gotoTable = new int[numStates][nonTerminalSymbols.size()];
+    /*private void initGotoTable() {
+        int numStates = actionTable.length;
+        int numNonTerminals = nonTerminals.size();
 
-        for (int i = 0; i < rules.size(); i++) {
-            String leftHandSide = getLeftHandSide(i);
-            int leftHandSideIndex = nonTerminalSymbols.indexOf(leftHandSide);
+        gotoTable = new int[numStates][numNonTerminals];
 
-            String[] rightHandSide = getRightHandSide(i);
+        // Inicializar la tabla Goto con -1
+        for (int i = 0; i < numStates; i++) {
+            for (int j = 0; j < numNonTerminals; j++) {
+                gotoTable[i][j] = -1;
+            }
+        }
 
-            for (int j = 0; j < rightHandSide.length; j++) {
-                String symbol = rightHandSide[j];
-                int symbolIndex = nonTerminalSymbols.indexOf(symbol);
-
-                if (symbolIndex != -1) {
-                    this.gotoTable[i][symbolIndex] = i + 1;
+        // Calcular los valores de la tabla Goto utilizando la tabla de acción existente
+        for (int i = 0; i < numStates; i++) {
+            for (int j = 0; j < numNonTerminals; j++) {
+                String nonTerminal = nonTerminals.get(j);
+                int nextState = actionTable[i][nonTerminals.size() + Terminals.size() + j];
+                if (nextState != -1 && isNonTerminal(nonTerminal)) {
+                    gotoTable[i][j] = nextState;
                 }
             }
         }
-    }
+    }*/
+
+    
+    
+
 
 
     
@@ -253,10 +568,18 @@ public class GrammarParser extends SLRParser {
         System.out.println("Reglas:");
         System.out.println(Arrays.deepToString(rules));
         
-        parser.initGotoTable();
-
+        // parser.initGotoTable();
+        parser.generateActionTable();
+        
+        ActionElement[][] actionTable = parser.getActionsTable();
+        System.out.println("Tabla ActionTable:");
+        System.out.println(Arrays.deepToString(actionTable));
+        
         int[][] gotoTable = parser.getGotoTable();
         System.out.println("Tabla Goto:");
         System.out.println(Arrays.deepToString(gotoTable));
+        
+        // Imprimir el árbol de sintaxis abstracta
+        // parser.printAST(parser.ast, 0);
     }
 }

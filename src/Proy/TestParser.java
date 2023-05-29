@@ -3,7 +3,7 @@ package Proy;
 import grammar_parser.*;
 
 public class TestParser {
-    public static void main(String[] args) throws SintaxException {
+    public static void main(String[] args) throws SintaxException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         String filePath = "Main.txt";
 
         GrammarParser parser = new GrammarParser(filePath);
