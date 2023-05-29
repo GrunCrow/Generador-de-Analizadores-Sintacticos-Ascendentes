@@ -200,7 +200,7 @@ public class GrammarParser extends SLRParser {
     
     // ======================================================================================
     //									Reglas
-    // ===========================================================================
+    // ======================================================================================
 
     private void listaReglas(ASTNode parent) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         regla(parent);
@@ -310,7 +310,7 @@ public class GrammarParser extends SLRParser {
     //									ActionTable
     // ===========================================================================
     
-    public int countStates(ASTNode node) {
+    /*public int countStates(ASTNode node) {
         int count = 1; // Contar el nodo actual
 
         // Recorrer los hijos del nodo actual y contar los nodos en cada uno
@@ -461,7 +461,7 @@ public class GrammarParser extends SLRParser {
                 actionTable[i][column] = new ActionElement(ActionElement.ACCEPT, -1);
             }
         }
-    }
+    }*/
 
 
     
@@ -569,7 +569,7 @@ public class GrammarParser extends SLRParser {
         System.out.println(Arrays.deepToString(rules));
         
         // parser.initGotoTable();
-        parser.generateActionTable();
+        //parser.generateActionTable();
         
         ActionElement[][] actionTable = parser.getActionsTable();
         System.out.println("Tabla ActionTable:");
