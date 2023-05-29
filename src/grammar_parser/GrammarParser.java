@@ -68,6 +68,75 @@ public class GrammarParser extends SLRParser {
         // Ignorar el comentario y obtener el siguiente token
         getNextToken();
     }
+    
+    
+    
+    
+    /** ========================================================================
+     * 									Auxiliares
+     * ========================================================================
+     * **/
+    
+    private List<String> obtenerSimbolosNoTerminales() {
+        List<String> nonTerminals = new ArrayList<>();
+        try {
+            Class<?> symbolConstantsClass = Class.forName("generated.SymbolConstants");
+            Field[] fields = symbolConstantsClass.getDeclaredFields();
+            for (Field field : fields) {
+                int modifiers = field.getModifiers();
+                if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && field.getType() == int.class) {
+                    nonTerminals.add(field.getName());
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return nonTerminals;
+    }
+    
+    private List<String> obtenerSimbolosTerminales() {
+        List<String> Terminals = new ArrayList<>();
+        try {
+            Class<?> tokenConstantsClass = Class.forName("generated.TokenConstants");
+            Field[] fields = tokenConstantsClass.getDeclaredFields();
+            for (Field field : fields) {
+                int modifiers = field.getModifiers();
+                if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && field.getType() == int.class) {
+                    Terminals.add(field.getName());
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return Terminals;
+    }
+    
+    private int getNonTerminalIndex(String nonTerminal) {
+        return nonTerminals.indexOf(nonTerminal);
+    }
+
+    private int getTerminalIndex(String terminal) {
+        return Terminals.indexOf(terminal);
+    }
+    
+    private boolean isNonTerminal(String symbol) {
+        return nonTerminals.contains(symbol);
+    }
+    
+    private boolean isTerminal(String symbol) {
+        return Terminals.contains(symbol);
+    }
+    
+    
+    
+    
+    
+    
+    
+    /** ========================================================================
+     * 										REGLAS
+     * ========================================================================
+     * **/
 
     private void listaReglas(String leftHandSide) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         regla(leftHandSide);
@@ -118,72 +187,17 @@ public class GrammarParser extends SLRParser {
         }
     }
 
-    // Métodos abstractos
-
-    protected int rules_getRowCount() {
-        // Implementación para obtener el número de filas en la tabla de reglas
-        return rules_symbols.size();
-    }
-
-    protected int rules_getColumnCount() {
-        // Implementación para obtener el número de columnas en la tabla de reglas
-        return 2;
-    }
-
-    protected String getLeftHandSide(int row) {
-        // Implementación para obtener el lado izquierdo de una regla en la tabla de reglas
-        if (row >= 0 && row < rules_getRowCount()) {
-            return rules_symbols.get(row)[0];
-        }
-        return null;
-    }
-
-    protected String[] getRightHandSide(int row) {
-        // Implementación para obtener el lado derecho de una regla en la tabla de reglas
-        if (row >= 0 && row < rules_getRowCount()) {
-            return rules_symbols.get(row)[1].split(" ");
-        }
-        return null;
-    }
-
-    protected void setRule(int rowIndex, String leftHandSide, String[] rightHandSide) {
-        // No se implementa este método ya que la lógica se ha modificado para evitar la sobreescritura de reglas
-    }
     
     
-    private List<String> obtenerSimbolosNoTerminales() {
-        List<String> nonTerminals = new ArrayList<>();
-        try {
-            Class<?> symbolConstantsClass = Class.forName("generated.SymbolConstants");
-            Field[] fields = symbolConstantsClass.getDeclaredFields();
-            for (Field field : fields) {
-                int modifiers = field.getModifiers();
-                if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && field.getType() == int.class) {
-                    nonTerminals.add(field.getName());
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return nonTerminals;
-    }
     
-    private List<String> obtenerSimbolosTerminales() {
-        List<String> Terminals = new ArrayList<>();
-        try {
-            Class<?> tokenConstantsClass = Class.forName("generated.TokenConstants");
-            Field[] fields = tokenConstantsClass.getDeclaredFields();
-            for (Field field : fields) {
-                int modifiers = field.getModifiers();
-                if (Modifier.isPublic(modifiers) && Modifier.isStatic(modifiers) && field.getType() == int.class) {
-                    Terminals.add(field.getName());
-                }
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return Terminals;
-    }
+    /** ========================================================================
+     * 										ActionTable
+     * ========================================================================
+     * **/
+    
+    
+    
+    
     
     // Generar Tabla Goto
     /*
@@ -247,6 +261,42 @@ public class GrammarParser extends SLRParser {
     public ActionElement[][] getActionsTable() {
 		return actionTable;
 	}
+    
+    
+ // Métodos abstractos
+
+    protected int rules_getRowCount() {
+        // Implementación para obtener el número de filas en la tabla de reglas
+        return rules_symbols.size();
+    }
+
+    protected int rules_getColumnCount() {
+        // Implementación para obtener el número de columnas en la tabla de reglas
+        return 2;
+    }
+
+    protected String getLeftHandSide(int row) {
+        // Implementación para obtener el lado izquierdo de una regla en la tabla de reglas
+        if (row >= 0 && row < rules_getRowCount()) {
+            return rules_symbols.get(row)[0];
+        }
+        return null;
+    }
+
+    protected String[] getRightHandSide(int row) {
+        // Implementación para obtener el lado derecho de una regla en la tabla de reglas
+        if (row >= 0 && row < rules_getRowCount()) {
+            return rules_symbols.get(row)[1].split(" ");
+        }
+        return null;
+    }
+
+    protected void setRule(int rowIndex, String leftHandSide, String[] rightHandSide) {
+        // No se implementa este método ya que la lógica se ha modificado para evitar la sobreescritura de reglas
+    }
+    
+    
+    
     
     public static void main(String[] args) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         GrammarParser parser = new GrammarParser("Main.txt");
