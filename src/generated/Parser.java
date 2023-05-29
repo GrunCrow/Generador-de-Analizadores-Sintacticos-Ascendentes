@@ -53,6 +53,7 @@ public Parser() throws SintaxException, IOException {
 		gotoTable[5][Term] = 6;
 		gotoTable[5][Factor] = 6;
 
+
 		gotoTable[7][Expr] = 8;
 
 		gotoTable[8][Args] = 9;

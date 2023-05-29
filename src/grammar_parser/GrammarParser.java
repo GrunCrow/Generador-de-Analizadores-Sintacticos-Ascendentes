@@ -196,6 +196,8 @@ public class GrammarParser extends SLRParser {
     private void initGotoTable() {
         List<String> nonTerminalSymbols = obtenerSimbolosNoTerminales();
         List<String> TerminalSymbols = obtenerSimbolosTerminales();
+        
+        int numStates = rules.size();
         this.gotoTable = new int[numStates][nonTerminalSymbols.size()];
 
         for (int i = 0; i < rules.size(); i++) {
