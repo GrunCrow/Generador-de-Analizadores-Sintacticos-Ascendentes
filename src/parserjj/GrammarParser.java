@@ -7,9 +7,8 @@ import parserjj.TokenKind;
 
 /**
  * Analizador sintáctico basado en una gramática BNF y LL(1)
- *  
  */
-public class GrammarParser {
+public class GrammarParser extends SLRParser {
     /**
      * Analizador léxico
      */
@@ -22,7 +21,7 @@ public class GrammarParser {
 
     /**
      * Método de análisis de un fichero
-     * 
+     *
      * @param file Fichero a analizar
      * @return Resultado del análisis sintáctico
      */
@@ -38,7 +37,8 @@ public class GrammarParser {
 
     /**
      * Analiza el símbolo <Grammar>
-     * @throws SyntaxException
+     *
+     * @throws SintaxException
      */
     private void parseGrammar() throws SintaxException {
         switch (nextToken.getKind()) {
@@ -56,7 +56,8 @@ public class GrammarParser {
 
     /**
      * Analiza el símbolo <Definition>
-     * @throws SyntaxException
+     *
+     * @throws SintaxException
      */
     private void parseDefinition() throws SintaxException {
         match(TokenKind.NOTERMINAL);
@@ -67,7 +68,8 @@ public class GrammarParser {
 
     /**
      * Analiza el símbolo <RuleList>
-     * @throws SyntaxException
+     *
+     * @throws SintaxException
      */
     private void parseRuleList() throws SintaxException {
         switch (nextToken.getKind()) {
@@ -83,7 +85,8 @@ public class GrammarParser {
 
     /**
      * Analiza el símbolo <RuleListPrime>
-     * @throws SyntaxException
+     *
+     * @throws SintaxException
      */
     private void parseRuleListPrime() throws SintaxException {
         switch (nextToken.getKind()) {
@@ -102,7 +105,8 @@ public class GrammarParser {
 
     /**
      * Analiza el símbolo <Rule>
-     * @throws SyntaxException
+     *
+     * @throws SintaxException
      */
     private void parseRule() throws SintaxException {
         switch (nextToken.getKind()) {
@@ -122,7 +126,8 @@ public class GrammarParser {
 
     /**
      * Analiza el símbolo <Element>
-     * @throws SyntaxException
+     *
+     * @throws SintaxException
      */
     private void parseElement() throws SintaxException {
         switch (nextToken.getKind()) {
@@ -140,8 +145,9 @@ public class GrammarParser {
 
     /**
      * Método que consume un token de la cadena de entrada
+     *
      * @param kind Tipo de token a consumir
-     * @throws SyntaxException Si el tipo no coincide con el token 
+     * @throws SintaxException Si el tipo no coincide con el token
      */
     private void match(int kind) throws SintaxException {
         if (nextToken.getKind() == kind)
@@ -149,11 +155,7 @@ public class GrammarParser {
         else
             throw new SintaxException(nextToken, kind);
     }
-    
-    
-    
-    
-    
+
     public static void main(String[] args) {
         GrammarParser parser = new GrammarParser();
 
