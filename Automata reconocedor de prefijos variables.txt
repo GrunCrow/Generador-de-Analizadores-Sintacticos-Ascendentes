@@ -1,0 +1,221 @@
+[ELEMENTOS: 
+Inicio -> # Expr 
+Expr -> # Term 
+Expr -> # Expr <PLUS> Term 
+Expr -> # Expr <MINUS> Term 
+Term -> # Factor 
+Term -> # Term <PROD> Factor 
+Term -> # Term <DIV> Factor 
+Factor -> # <NUM> 
+Factor -> # <LPAREN> Expr <RPAREN> 
+Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+TRANSICIONES: 
+Expr -> 1
+Term -> 21
+Factor -> 22
+<NUM> -> 6
+<LPAREN> -> 7
+<IDENTIFIER> -> 14
+, ELEMENTOS: 
+Inicio -> Expr # 
+Expr -> Expr # <PLUS> Term 
+Expr -> Expr # <MINUS> Term 
+TRANSICIONES: 
+Reduccion R -1
+<PLUS> -> 2
+<MINUS> -> 10
+, ELEMENTOS: 
+Expr -> Expr <PLUS> # Term 
+Term -> # Factor 
+Term -> # Term <PROD> Factor 
+Term -> # Term <DIV> Factor 
+Factor -> # <NUM> 
+Factor -> # <LPAREN> Expr <RPAREN> 
+Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+TRANSICIONES: 
+Term -> 3
+Factor -> 22
+<NUM> -> 6
+<LPAREN> -> 7
+<IDENTIFIER> -> 14
+, ELEMENTOS: 
+Expr -> Expr <PLUS> Term # 
+Term -> Term # <PROD> Factor 
+Term -> Term # <DIV> Factor 
+TRANSICIONES: 
+Reduccion R 1
+<PROD> -> 4
+<DIV> -> 12
+, ELEMENTOS: 
+Term -> Term <PROD> # Factor 
+Factor -> # <NUM> 
+Factor -> # <LPAREN> Expr <RPAREN> 
+Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+TRANSICIONES: 
+Factor -> 5
+<NUM> -> 6
+<LPAREN> -> 7
+<IDENTIFIER> -> 14
+, ELEMENTOS: 
+Term -> Term <PROD> Factor # 
+TRANSICIONES: 
+Reduccion R 4
+, ELEMENTOS: 
+Factor -> <NUM> # 
+TRANSICIONES: 
+Reduccion R 6
+, ELEMENTOS: 
+Factor -> <LPAREN> # Expr <RPAREN> 
+Expr -> # Term 
+Expr -> # Expr <PLUS> Term 
+Expr -> # Expr <MINUS> Term 
+Term -> # Factor 
+Term -> # Term <PROD> Factor 
+Term -> # Term <DIV> Factor 
+Factor -> # <NUM> 
+Factor -> # <LPAREN> Expr <RPAREN> 
+Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+TRANSICIONES: 
+Expr -> 8
+Term -> 21
+Factor -> 22
+<NUM> -> 6
+<LPAREN> -> 7
+<IDENTIFIER> -> 14
+, ELEMENTOS: 
+Factor -> <LPAREN> Expr # <RPAREN> 
+Expr -> Expr # <PLUS> Term 
+Expr -> Expr # <MINUS> Term 
+TRANSICIONES: 
+<RPAREN> -> 9
+<PLUS> -> 2
+<MINUS> -> 10
+, ELEMENTOS: 
+Factor -> <LPAREN> Expr <RPAREN> # 
+TRANSICIONES: 
+Reduccion R 7
+, ELEMENTOS: 
+Expr -> Expr <MINUS> # Term 
+Term -> # Factor 
+Term -> # Term <PROD> Factor 
+Term -> # Term <DIV> Factor 
+Factor -> # <NUM> 
+Factor -> # <LPAREN> Expr <RPAREN> 
+Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+TRANSICIONES: 
+Term -> 11
+Factor -> 22
+<NUM> -> 6
+<LPAREN> -> 7
+<IDENTIFIER> -> 14
+, ELEMENTOS: 
+Expr -> Expr <MINUS> Term # 
+Term -> Term # <PROD> Factor 
+Term -> Term # <DIV> Factor 
+TRANSICIONES: 
+Reduccion R 2
+<PROD> -> 4
+<DIV> -> 12
+, ELEMENTOS: 
+Term -> Term <DIV> # Factor 
+Factor -> # <NUM> 
+Factor -> # <LPAREN> Expr <RPAREN> 
+Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+TRANSICIONES: 
+Factor -> 13
+<NUM> -> 6
+<LPAREN> -> 7
+<IDENTIFIER> -> 14
+, ELEMENTOS: 
+Term -> Term <DIV> Factor # 
+TRANSICIONES: 
+Reduccion R 5
+, ELEMENTOS: 
+Factor -> <IDENTIFIER> # <LPAREN> Args <RPAREN> 
+TRANSICIONES: 
+<LPAREN> -> 15
+, ELEMENTOS: 
+Factor -> <IDENTIFIER> <LPAREN> # Args <RPAREN> 
+Args -> # ArgumentList 
+Args -> # 
+ArgumentList -> # Expr 
+ArgumentList -> # ArgumentList <COMMA> Expr 
+Expr -> # Term 
+Expr -> # Expr <PLUS> Term 
+Expr -> # Expr <MINUS> Term 
+Term -> # Factor 
+Term -> # Term <PROD> Factor 
+Term -> # Term <DIV> Factor 
+Factor -> # <NUM> 
+Factor -> # <LPAREN> Expr <RPAREN> 
+Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+TRANSICIONES: 
+Args -> 16
+ArgumentList -> 18
+Reduccion R 10
+Expr -> 23
+Term -> 21
+Factor -> 22
+<NUM> -> 6
+<LPAREN> -> 7
+<IDENTIFIER> -> 14
+, ELEMENTOS: 
+Factor -> <IDENTIFIER> <LPAREN> Args # <RPAREN> 
+TRANSICIONES: 
+<RPAREN> -> 17
+, ELEMENTOS: 
+Factor -> <IDENTIFIER> <LPAREN> Args <RPAREN> # 
+TRANSICIONES: 
+Reduccion R 8
+, ELEMENTOS: 
+Args -> ArgumentList # 
+ArgumentList -> ArgumentList # <COMMA> Expr 
+TRANSICIONES: 
+Reduccion R 9
+<COMMA> -> 19
+, ELEMENTOS: 
+ArgumentList -> ArgumentList <COMMA> # Expr 
+Expr -> # Term 
+Expr -> # Expr <PLUS> Term 
+Expr -> # Expr <MINUS> Term 
+Term -> # Factor 
+Term -> # Term <PROD> Factor 
+Term -> # Term <DIV> Factor 
+Factor -> # <NUM> 
+Factor -> # <LPAREN> Expr <RPAREN> 
+Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+TRANSICIONES: 
+Expr -> 20
+Term -> 21
+Factor -> 22
+<NUM> -> 6
+<LPAREN> -> 7
+<IDENTIFIER> -> 14
+, ELEMENTOS: 
+ArgumentList -> ArgumentList <COMMA> Expr # 
+Expr -> Expr # <PLUS> Term 
+Expr -> Expr # <MINUS> Term 
+TRANSICIONES: 
+Reduccion R 12
+<PLUS> -> 2
+<MINUS> -> 10
+, ELEMENTOS: 
+Expr -> Term # 
+Term -> Term # <PROD> Factor 
+Term -> Term # <DIV> Factor 
+TRANSICIONES: 
+Reduccion R 0
+<PROD> -> 4
+<DIV> -> 12
+, ELEMENTOS: 
+Term -> Factor # 
+TRANSICIONES: 
+Reduccion R 3
+, ELEMENTOS: 
+ArgumentList -> Expr # 
+Expr -> Expr # <PLUS> Term 
+Expr -> Expr # <MINUS> Term 
+TRANSICIONES: 
+Reduccion R 11
+<PLUS> -> 2
+<MINUS> -> 10

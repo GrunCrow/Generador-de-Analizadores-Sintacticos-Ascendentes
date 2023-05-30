@@ -1,5 +1,3 @@
-package generated;
-
 public interface SymbolConstants {
 
 	 public int Expr = 0;

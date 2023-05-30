@@ -1,0 +1,2 @@
+error found:
+java.io.FileNotFoundException: C:\Users\albam\OneDrive - UNIVERSIDAD DE HUELVA\2. Universidad\4º Curso\2. 2º Cuatrimestre\Procesadores de Lenguajes\Prácticas\Proyecto\Proyectosrc\generated\SymbolConstants.java (The system cannot find the path specified)

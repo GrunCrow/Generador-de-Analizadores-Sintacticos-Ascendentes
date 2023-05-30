@@ -1,5 +1,3 @@
-package generated;
-
 public interface TokenConstants {
 
 	 public int EOF = 0;
