@@ -3,7 +3,7 @@ package AST;
 /**
  * Nodo del AST que representa un símbolo no terminal
  */
-class NonTerminalNode extends ASTNode {
+public class NonTerminalNode extends ASTNode {
     private String symbol;
 
     public NonTerminalNode(String symbol) {

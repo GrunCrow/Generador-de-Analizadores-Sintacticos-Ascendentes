@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Nodo del AST que representa una definición de la gramática
  */
-class DefinitionNode extends ASTNode {
+public class DefinitionNode extends ASTNode {
     private NonTerminalNode nonTerminal;
     private List<ASTNode> ruleList;
 

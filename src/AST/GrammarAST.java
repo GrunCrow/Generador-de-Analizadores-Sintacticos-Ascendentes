@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Clase que representa el AST de la gramática BNF
  */
-class GrammarAST {
+public class GrammarAST {
     private List<DefinitionNode> definitions;
 
     public GrammarAST(List<DefinitionNode> definitions) {
