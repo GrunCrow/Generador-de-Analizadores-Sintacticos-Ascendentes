@@ -169,7 +169,8 @@ public class GrammarParser extends SLRParser {
 
         // Verificar si ya existe una regla con el mismo lado izquierdo y lado derecho
         if (!ruleExists(leftHandSide, rightHandSide.toArray(new String[0]))) {
-            rules_symbols.add(new String[]{leftHandSide, String.join(" ", rightHandSide)});
+        	String[] current_rule_symbols = new String[]{leftHandSide, String.join(" ", rightHandSide)};
+            rules_symbols.add(current_rule_symbols);
             
             // Obtener el campo correspondiente a la variable en la interfaz
             Field field = SymbolConstants.class.getField(leftHandSide);
@@ -186,13 +187,74 @@ public class GrammarParser extends SLRParser {
                 ruleNode.addChild(symbolNode);
             }
             
-            // Realizar el análisis SLR para construir el árbol AST
-            //analyzeSLR(ruleNode);
-            
-			// Agregar el nodo de la regla al árbol AST
+            // Agregar el nodo de la regla al árbol AST
             root.addChild(ruleNode);
+            
+			
         }
     }
+    
+    
+    private void rules() {
+        // Crear una pila para realizar el análisis SLR
+        Stack<Integer> stack = new Stack<>();
+        stack.push(0);
+
+        // Crear la tabla de acciones
+        int numStates = root.countLeaves(); //rules.size();
+        int numSymbols = nonTerminals.size() + Terminals.size();
+        actionTable = new ActionElement[numStates][numSymbols];
+
+        // Recorrer las reglas
+        for (int i = 0; i < rules.size(); i++) {
+            int[] rule = rules.get(i);
+            int leftHandSide = rule[0];
+            int numRightElements = rule[1];
+
+            String[] rightHandSide = rules_symbols.get(i)[1].split(" ");
+
+            // Realizar desplazamientos
+            if (numRightElements > 0) {
+            	int peek = stack.peek();
+            	int idx_nt = getNonTerminalIndex(rightHandSide[0]);
+            	int idx_t = getTerminalIndex(rightHandSide[0]);
+            	int idx= 0;
+            	
+            	if(idx_nt == -1) idx += nonTerminals.size() - 1 + idx_t;
+            	else if(idx_t == -1) idx = idx_nt;
+            		
+            	
+                int nextState = gotoTable[peek][idx];
+                stack.push(nextState);
+            }
+
+            // Realizar reducciones
+            while (numRightElements == 0 && !stack.isEmpty()) {
+                int currentState = stack.peek();
+                ActionElement action = new ActionElement(ActionElement.REDUCE, i);
+
+                for (int j = 0; j < numSymbols; j++) {
+                    if (actionTable[currentState][j] == null) {
+                        actionTable[currentState][j] = action;
+                    }
+                }
+
+                int reduceSymbolIndex = leftHandSide;
+                if (reduceSymbolIndex != -1) {
+                    stack.pop();
+                    int previousState = stack.peek();
+                    int nextState = gotoTable[previousState][reduceSymbolIndex];
+                    stack.push(nextState);
+                }
+            }
+        }
+
+        // Realizar las acciones de aceptación
+        int acceptState = stack.peek();
+        actionTable[acceptState][TokenConstants.EOF] = new ActionElement(ActionElement.ACCEPT, -1);
+    }
+
+    
     private void printAST(ASTNode node, int level) {
         StringBuilder indent = new StringBuilder();
         for (int i = 0; i < level; i++) {
@@ -351,6 +413,8 @@ public class GrammarParser extends SLRParser {
         System.out.println(Arrays.deepToString(rules));
         
         parser.printAST(parser.root, 0);
+        
+        parser.rules();
         
         ActionElement[][] Actiontable = parser.getActionsTable();
         System.out.println("Tabla ActionTable:");

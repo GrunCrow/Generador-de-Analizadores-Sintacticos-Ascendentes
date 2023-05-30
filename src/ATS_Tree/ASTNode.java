@@ -48,20 +48,41 @@ public class ASTNode {
             int index = children.indexOf(child);
             ASTNode previousSibling = children.get(index - 1);
             previousSibling.nextSibling = child;
+            child.nextSibling = null;
         }
         
         // Actualizar los índices de los nodos
         updateIndices();
     }
     
+    public void addChild(int index, ASTNode child) {
+        children.add(index, child);
+        child.setParent(this);
+
+        // Establecer el siguiente hermano
+        if (index > 0 && index < children.size() - 1) {
+            ASTNode previousSibling = children.get(index - 1);
+            ASTNode nextSibling = children.get(index + 1);
+            previousSibling.nextSibling = child;
+            child.nextSibling = nextSibling;
+        } else if (index == 0 && children.size() > 1) {
+            ASTNode nextSibling = children.get(index + 1);
+            nextSibling.nextSibling = child;
+            child.nextSibling = null;
+        }
+
+        // Actualizar los índices de los nodos
+        updateIndices();
+    }
+
+    
     private void updateIndices() {
         if (parent != null) {
-            int currentIndex = parent.children.indexOf(this);
-            int startIndex = currentIndex + 1;
-
-            for (int i = startIndex; i < parent.children.size(); i++) {
+            for (int i = 0; i < parent.children.size(); i++) {
                 ASTNode sibling = parent.children.get(i);
-                sibling.index = sibling.parent.index;
+                sibling.index = i;
+                sibling.nextSibling = (i < parent.children.size() - 1) ? parent.children.get(i + 1) : null;
+                
             }
         }
 
@@ -70,6 +91,7 @@ public class ASTNode {
             child.updateIndices();
         }
     }
+
     
     public int getIndex() {
         return index;
@@ -78,4 +100,17 @@ public class ASTNode {
     public void setIndex(int index) {
         this.index = index;
     }
+    
+    public int countLeaves() {
+        if (children.isEmpty()) {
+            return 1; // Si no tiene hijos, es una hoja
+        } else {
+            int count = 0;
+            for (ASTNode child : children) {
+                count += child.countLeaves(); // Sumar el número de hojas de cada hijo
+            }
+            return count;
+        }
+    }
+
 }
