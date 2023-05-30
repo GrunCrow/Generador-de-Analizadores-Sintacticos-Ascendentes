@@ -45,6 +45,6 @@ public class LexicalError extends Error {
 	 */
 	public String toString() 
 	{
-		return "Error l�xico: car�cter "+source+" [Fila "+row+", Column "+column+"]\n";
+		return "Error lexico: caracter "+source+" [Fila "+row+", Column "+column+"]\n";
 	}
 }
