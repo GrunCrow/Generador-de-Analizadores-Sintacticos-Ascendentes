@@ -21,6 +21,7 @@ public class ProyectoGenerator {
 		leerFicheroSalida(ruta);
 		generaTokenConstants();
 		generaSymbolConstants();
+		generaGramatica();
 		
 		gramatica.eliminaLambda();
 		automata.creaEstadoCero();
@@ -105,9 +106,11 @@ public class ProyectoGenerator {
 		File workingdir = directorioTrabajo();
 
 		try {
-			FileOutputStream outputfile = new FileOutputStream(new File(workingdir, "SymbolConstants.java"));
+			FileOutputStream outputfile = new FileOutputStream(new File("src/generated", "SymbolConstants.java"));
 			PrintStream stream = new PrintStream(outputfile);
 
+			stream.println("package generated;\n");
+			
 			stream.println("public interface SymbolConstants {\n");
 
 			int i = 0;
@@ -130,8 +133,11 @@ public class ProyectoGenerator {
 		File workingdir = directorioTrabajo();
 
 		try {
-			FileOutputStream outputfile = new FileOutputStream(new File(workingdir, "TokenConstants.java"));
+			FileOutputStream outputfile = new FileOutputStream(new File("src/generated", "TokenConstants.java"));
 			PrintStream stream = new PrintStream(outputfile);
+			
+			stream.println("package generated;\n");
+			
 
 			stream.println("public interface TokenConstants {\n");
 			stream.println("\t public int EOF = 0;");
@@ -141,9 +147,21 @@ public class ProyectoGenerator {
 				i++;
 			}
 			stream.println("\n}");
+		} catch (Error err) {
+			printError(workingdir, err);
+		} catch (Exception ex) {
+			printError(workingdir, ex);
+		}
 
-			
-			
+	}
+	
+	
+	private void generaGramatica() {
+		File workingdir = directorioTrabajo();
+
+		try {
+			FileOutputStream outputfile = new FileOutputStream(new File("src/generated", "Gramatica.txt"));
+			PrintStream stream = new PrintStream(outputfile);
 			
 			Gramatica gramaticaConLambda = gramatica;
 			gramaticaConLambda.insertaLambda();
@@ -176,6 +194,7 @@ public class ProyectoGenerator {
 		}
 
 	}
+	
 
 	public void generaParser() {
 		File workingdir = directorioTrabajo();
