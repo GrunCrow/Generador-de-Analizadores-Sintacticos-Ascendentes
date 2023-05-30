@@ -41,6 +41,7 @@ public class GrammarParser extends SLRParser {
      * @throws SintaxException
      */
     private void parseGrammar() throws SintaxException {
+    	// int val = nextToken.getKind();
         switch (nextToken.getKind()) {
             case TokenKind.NOTERMINAL:
                 parseDefinition();
@@ -48,6 +49,15 @@ public class GrammarParser extends SLRParser {
                 break;
             case TokenKind.EOF:
                 break;
+            case TokenKind.COMENTARIO:
+            	match(TokenKind.COMENTARIO);
+            	parseGrammar();
+            	break;
+        	case TokenKind.BLANCO:
+            	// no se hace nada, se ignora
+            	match(TokenKind.BLANCO);
+            	parseGrammar();
+            	break;
             default:
                 int[] expected = { TokenKind.NOTERMINAL, TokenKind.EOF };
                 throw new SintaxException(nextToken, expected);
@@ -74,6 +84,10 @@ public class GrammarParser extends SLRParser {
     private void parseRuleList() throws SintaxException {
         switch (nextToken.getKind()) {
             case TokenKind.NOTERMINAL:
+                parseRule();
+                parseRuleListPrime();
+                break;
+            case TokenKind.TERMINAL:
                 parseRule();
                 parseRuleListPrime();
                 break;

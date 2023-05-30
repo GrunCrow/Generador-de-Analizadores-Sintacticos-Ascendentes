@@ -106,7 +106,7 @@ public class GrammarLexer extends Lexer implements TokenConstants {
 	 */
 	protected Token getToken(int state, String lexeme, int row, int column) {
 	    switch (state) {
-	    	case 1: return new Token(TokenKind.BLANCO, lexeme, row, column);
+	    	//case 1: return new Token(TokenKind.BLANCO, lexeme, row, column);
 	        case 5: return new Token(TokenKind.COMENTARIO, lexeme, row, column);
 	        case 7: return new Token(TokenKind.COMENTARIO, lexeme, row, column);
 	        case 10: return new Token(TokenKind.TERMINAL, lexeme, row, column);
@@ -168,9 +168,9 @@ public class GrammarLexer extends Lexer implements TokenConstants {
             
             Token token = lexer.getNextToken();
             while (token.getKind() != TokenKind.EOF) {
-            	if (token.getKind() != TokenKind.BLANCO) {
+            	//if (token.getKind() != TokenKind.BLANCO) {
             		System.out.println(token);
-            	}
+            	//}
                 token = lexer.getNextToken();
             }
             
