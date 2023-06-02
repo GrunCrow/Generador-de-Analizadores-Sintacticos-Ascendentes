@@ -181,7 +181,7 @@ public class Generator {
 		File workingdir = directorioTrabajo();
 
 		try {
-			FileOutputStream outputfile = new FileOutputStream(new File(workingdir, "Parser.java"));
+			FileOutputStream outputfile = new FileOutputStream(new File(workingdir, "src/generated/Parser.java"));
 			PrintStream stream = new PrintStream(outputfile);
 			
 			//Emepzamos con Parser() y lo cerramos
