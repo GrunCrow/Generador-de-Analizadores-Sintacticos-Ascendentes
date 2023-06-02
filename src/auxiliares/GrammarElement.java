@@ -1,34 +1,47 @@
 package auxiliares;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class Element {
+public class GrammarElement {
 
-	String identifier;
-	ArrayList<Expression> production;
-	Expression marker;
+	private String identifier;
+	private List<Expression> production;
+	private Expression marker;
 	
-	public Element(Element element) {
-		this.identifier = element.identifier;
+	public GrammarElement(GrammarElement grammarElement) {
+		this.identifier = grammarElement.identifier;
 		this.production = new ArrayList<>();
-		this.production.addAll(element.production);
-		// TODO poner un punto en vez de hashtag??
+		this.production.addAll(grammarElement.production);
 		marker = new Expression(".",false);
 	}
 	
-	public Element(String identifier,ArrayList<Expression> production, boolean marked) {
+	public GrammarElement(String identifier,List<Expression> produccionInicio, boolean marked) {
 		this.identifier = identifier;
-		this.production = production;
-		// TODO poner un punto en vez de hashtag??
+		this.production = produccionInicio;
 		marker = new Expression(".",false);
 		if(!marked) {
 			ArrayList<Expression> aux = new ArrayList<>();
 			aux.add(marker);
-			aux.addAll(production);
+			aux.addAll(produccionInicio);
 			this.production = aux;
 		}
 	}
 	
+	
+	
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	public List<Expression> getProduction() {
+		return production;
+	}
+
+	public Expression getMarker() {
+		return marker;
+	}
+
 	public boolean adelantaCursor() {
 		int indice = indiceMarcador();
 		
@@ -45,7 +58,6 @@ public class Element {
 		int indice = -1;
 		
 		for(int i=0; i<production.size(); i++) {
-			// TODO poner un punto en vez de hashtag??
 			if(production.get(i).expression.equals("."))
 				indice = i;
 		}
@@ -62,7 +74,7 @@ public class Element {
 		return false;
 	}
 	
-	public boolean elementosIguales(Element elementAnalizar) {
+	public boolean elementosIguales(GrammarElement elementAnalizar) {
 		
 		if(this.production.size() != elementAnalizar.production.size())
 			return false;
@@ -73,10 +85,9 @@ public class Element {
 			if(!this.production.get(i).expression.equals(elementAnalizar.production.get(i).expression))
 				return false;
 		}
-		
-		
 		return true;
 	}
+
 	
 	
 	public String toString() {

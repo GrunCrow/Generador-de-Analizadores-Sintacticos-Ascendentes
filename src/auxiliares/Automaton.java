@@ -4,224 +4,196 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-
-//Automata reconocedor de prefijos variables
+// Automata reconocedor de prefijos variables
 public class Automaton {
+    private List<State> states;
+    private Grammar grammar;
 
-	ArrayList<State> states;
-	Grammar grammar;
-	
+    public Automaton(Grammar grammar) {
+        states = new ArrayList<>();
+        this.grammar = grammar;
+    }
 
-	public Automaton(Grammar grammar) {
-		states = new ArrayList<>();
-		this.grammar = grammar;
+    
+    
+    public List<State> getStates() {
+		return states;
 	}
+
+
+
+	public Grammar getGrammar() {
+		return grammar;
+	}
+
+
 
 	public void creaEstadoCero() throws FileNotFoundException {
-		Rule primeraRegla = grammar.rules.get(0);
+        Rule primeraRegla = grammar.rules.get(0);
 
-		ArrayList<Expression> produccionInicio = new ArrayList<>();
-		produccionInicio.add(new Expression(primeraRegla.identifier, false));
-		Element primerElemento = new Element("Inicio", produccionInicio, false);
-		ArrayList<Element> elementoParaCreacionEstados = new ArrayList<>();
-		elementoParaCreacionEstados.add(primerElemento);
+        List<Expression> produccionInicio = new ArrayList<>();
+        produccionInicio.add(new Expression(primeraRegla.identifier, false));
+        GrammarElement primerElemento = new GrammarElement("Inicio", produccionInicio, false);
+        List<GrammarElement> elementoParaCreacionEstados = new ArrayList<>();
+        elementoParaCreacionEstados.add(primerElemento);
 
-		creaEstadoAPartirUnElemento(elementoParaCreacionEstados);
+        creaEstadoAPartirUnElemento(elementoParaCreacionEstados);
 
-		System.out.println("Final Alcanzado");
-		
-		// N estados = 
-		//System.out.println(estados.size());
-		
-		FileOutputStream outputfile = new FileOutputStream(new File("src/generated/Automata.txt"));
-		PrintStream stream = new PrintStream(outputfile);
-		
-		// System.out.println(estados.toString());
-		stream.println(states.toString());
-		stream.close();
-	}
+        System.out.println("Final Alcanzado");
 
-	// A partir de un elemento saca un nuevo estado, devuelve -1 si lo ha creado, o
-	// devuelve la posicion de un estado ya existente si existe un estado con
-	// las mismos elementos.
-	public int creaEstadoAPartirUnElemento(ArrayList<Element> elementosPartida) {
-		//int posicionEstado = -1;
-		State nuevoEstado = new State();
+        try (PrintStream stream = new PrintStream(new FileOutputStream(new File("src/generated/Automata.txt")))) {
+            stream.println(states.toString());
+        }
+    }
 
-		int numElementosAnadidos = 0;
-		for (Element elementoPartida : elementosPartida) {
-			// Agrego el elemento de partida al estado. A partir de este todos los elementos
-			// que incluya ese elemento segun su marcador
-			int i = 0;
-			nuevoEstado.anadirElemento(elementoPartida);
-			do {
-				ArrayList<Element> elementosAnadir = elementosNuevosPartiendoElementoActualMarcado(nuevoEstado.elements.get(i + numElementosAnadidos));
-				for (Element anadir : elementosAnadir) {
-					nuevoEstado.anadirElemento(anadir);
-				}
-				i++;
-			} while (nuevoEstado.elements.size() - numElementosAnadidos > i); // Mientras queden elementos sin
-																				// recorrer.
-			numElementosAnadidos += i;
-		}
+    public int creaEstadoAPartirUnElemento(List<GrammarElement> elementosPartida) {
+        State nuevoEstado = new State();
 
-		
-		// Tenemos un nuevo estado, hay que sacarle las transiciones. Pero primero
-		// comprobar si este estado existe ya entre todos los
-		// estados que tenemos para no tener estados duplicados.
-		int posicionEstado = existeEstado(nuevoEstado);
+        int numElementosAnadidos = 0;
+        for (GrammarElement elementoPartida : elementosPartida) {
+            nuevoEstado.anadirElemento(elementoPartida);
+            int i = 0;
+            do {
+                List<GrammarElement> elementosAnadir = elementosNuevosPartiendoElementoActualMarcado(nuevoEstado.getElements().get(i + numElementosAnadidos));
+                for (GrammarElement anadir : elementosAnadir) {
+                    nuevoEstado.anadirElemento(anadir);
+                }
+                i++;
+            } while (nuevoEstado.getElements().size() - numElementosAnadidos > i);
+            numElementosAnadidos += i;
+        }
 
-		if (posicionEstado != -1) {
-			return posicionEstado;
-		} // Si no existe lo creamos, le agregamos las transiciones y devolvemos su
-			// posicion(es decir la ultima del ArrayList)
+        int posicionEstado = existeEstado(nuevoEstado);
+        if (posicionEstado != -1) {
+            return posicionEstado;
+        }
 
+        states.add(nuevoEstado);
+        int posicionEstadoAnadido = states.size() - 1;
 
-		states.add(nuevoEstado);
-		int posicionEstadoAnadido = states.size() - 1;
-		
-		ArrayList<Transition> transicionesEstado = transicionesPosiblesEnUnEstado(states.get(posicionEstadoAnadido));
-		for (Transition transition : transicionesEstado) {
-			states.get(posicionEstadoAnadido).anadirTransicion(transition);
-		}
+        List<Transition> transicionesEstado = transicionesPosiblesEnUnEstado(states.get(posicionEstadoAnadido));
+        for (Transition transition : transicionesEstado) {
+            states.get(posicionEstadoAnadido).anadirTransicion(transition);
+        }
 
-		return posicionEstadoAnadido;
-	}
+        return posicionEstadoAnadido;
+    }
 
-	// Devolvemos la posicion del estado, si ya existe, sino -1 indicando que no hay
-	// un estado igual al pasado por parametro.
-	public int existeEstado(State state) {
-		int posicionEstado = -1;
+    public int existeEstado(State state) {
+        for (int i = 0; i < states.size(); i++) {
+            if (estadosIguales(state, states.get(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
-		for (int i = 0; i < states.size(); i++) {
-			if (estadosIguales(state, states.get(i))) {
-				return i;
-			}
-		}
-		return posicionEstado;
-	}
+    public boolean estadosIguales(State estado1, State estado2) {
+        if (estado1.getElements().size() != estado2.getElements().size()) {
+            return false;
+        }
 
-	public boolean estadosIguales(State estado1, State estado2) {
+        for (GrammarElement elemento1 : estado1.getElements()) {
+            boolean existeElemento = false;
 
-		if (estado1.elements.size() != estado2.elements.size()) {
-			return false;
-		}
+            for (GrammarElement elemento2 : estado2.getElements()) {
+                if (elemento1.elementosIguales(elemento2)) {
+                    existeElemento = true;
+                    break;
+                }
+            }
 
-		for (Element elemento1 : estado1.elements) {
-			boolean existeElemento = false;
+            if (!existeElemento) {
+                return false;
+            }
+        }
 
-			for (Element elemento2 : estado2.elements) {
-				if (elemento1.elementosIguales(elemento2)) {
-					existeElemento = true;
-				}
-			}
-			if (!existeElemento) {
-				return false;
-			}
-		}
-		return true;
-	}
+        return true;
+    }
 
-	public ArrayList<Element> elementosNuevosPartiendoElementoActualMarcado(Element elementoAnalizar) {
-		ArrayList<Element> devolver = new ArrayList<>();
+    public List<GrammarElement> elementosNuevosPartiendoElementoActualMarcado(GrammarElement elementoAnalizar) {
+        List<GrammarElement> devolver = new ArrayList<>();
+        int indiceMarcador = elementoAnalizar.indiceMarcador();
 
-		// Buscamos el marcado en el elemento a analizar
-		int indiceMarcador = elementoAnalizar.indiceMarcador();
+        if (!elementoAnalizar.marcadorAlFinal()) {
+            Expression produccionSiguienteMarcador = elementoAnalizar.getProduction().get(indiceMarcador + 1);
 
-		// Si no esta al final el marcador, comprobamos si es un token o un simbolo
-		if (!elementoAnalizar.marcadorAlFinal()) {
-//			devolver.add(elementoAnalizar);
-			Expression produccionSiguienteMarcador = elementoAnalizar.production.get(indiceMarcador + 1);
+            if (produccionSiguienteMarcador.terminal) {
+                return devolver;
+            } else {
+                String identificador = produccionSiguienteMarcador.expression;
 
-			if (produccionSiguienteMarcador.terminal) {
-				return devolver;
-			} else {
-				String identificador = produccionSiguienteMarcador.expression;
+                for (Rule reg : grammar.rules) {
+                    if (reg.identifier.equals(identificador)) {
+                        List<Expression> produccionNuevoElemento = new ArrayList<>(reg.production);
+                        GrammarElement nuevoElemento = new GrammarElement(reg.identifier, produccionNuevoElemento, false);
+                        devolver.add(nuevoElemento);
+                    }
+                }
+            }
+        }
 
-				// Buscamos todas las reglas que tengan como identificador ese simbolo, y las
-				// anadimos a los nuevos elementos
-				for (Rule reg : grammar.rules) {
-					if (reg.identifier.equals(identificador)) {
-						ArrayList<Expression> produccionNuevoElemento = new ArrayList<>();
-						produccionNuevoElemento.addAll(reg.production);
-						Element nuevoElemento = new Element(reg.identifier, produccionNuevoElemento, false);
-						devolver.add(nuevoElemento);
-					}
-				}
-			}
-		}
-		return devolver;
-	}
+        return devolver;
+    }
 
-	public ArrayList<Transition> transicionesPosiblesEnUnEstado(State state) {
-		ArrayList<Transition> transicionesNuevas = new ArrayList<>();
-	
-		for (Element element : state.elements) {
-			Transition transicionAuxiliar = new Transition();
-	
-			if (element.marcadorAlFinal()) {// Tenemos que anadir una reduccion...
-				transicionAuxiliar.addReduce(); // El destino es la regla que reduce...
-				transicionAuxiliar.anadirDestino(numeroReglaAPartirElemento(element));
-				if(element.production.size() > 1) {
-					transicionAuxiliar.setSource(new Expression(element.production.get(element.production.size()-2).expression,true));
-				}else {
-					transicionAuxiliar.setSource(new Expression("lambda",true));
+    public List<Transition> transicionesPosiblesEnUnEstado(State state) {
+        List<Transition> transicionesNuevas = new ArrayList<>();
 
-				}
-				transicionesNuevas.add(transicionAuxiliar);
+        for (GrammarElement grammarElement : state.getElements()) {
+            Transition transicionAuxiliar = new Transition();
 
-			} else { // Si no esta alfinal la transicion, crearla, apuntando a un estado existene o
-						// el que se cree...
-				Expression origen = new Expression(element.production.get(element.indiceMarcador() + 1));
-				transicionAuxiliar.setSource(origen); // Origen la expresion del elemento siguiente al marcador
-				ArrayList<Element> elementosParaCrearEstado = new ArrayList<>();
+            if (grammarElement.marcadorAlFinal()) {
+                transicionAuxiliar.addReduce();
+                transicionAuxiliar.anadirDestino(numeroReglaAPartirElemento(grammarElement));
+                if (grammarElement.getProduction().size() > 1) {
+                    transicionAuxiliar.setSource(new Expression(grammarElement.getProduction().get(grammarElement.getProduction().size() - 2).expression, true));
+                } else {
+                    transicionAuxiliar.setSource(new Expression("lambda", true));
+                }
+                transicionesNuevas.add(transicionAuxiliar);
+            } else {
+                Expression origen = new Expression(grammarElement.getProduction().get(grammarElement.indiceMarcador() + 1));
+                transicionAuxiliar.setSource(origen);
+                List<GrammarElement> elementosParaCrearEstado = new ArrayList<>();
 
-				for (Element elemento2 : state.elements) {// Conjunto de elementos para crear o ver si existe el
-					if (elementoTieneTransicionEnEsaExpresion(elemento2, origen)) {
-						Element elementoAux = new Element(elemento2);	
-						elementoAux.adelantaCursor();
-						elementosParaCrearEstado.add(elementoAux);
-					}
-				}
+                for (GrammarElement elemento2 : state.getElements()) {
+                    if (elementoTieneTransicionEnEsaExpresion(elemento2, origen)) {
+                        GrammarElement elementoAux = new GrammarElement(elemento2);
+                        elementoAux.adelantaCursor();
+                        elementosParaCrearEstado.add(elementoAux);
+                    }
+                }
 
-				int destino = creaEstadoAPartirUnElemento(elementosParaCrearEstado);
-				// para bprrar mas tarde
-				if (destino == -1) {
-					System.out.println("ALGO HA IDO MAL EN LA CREACION DEL ESTADO");
-				}
-				//
-				transicionAuxiliar.anadirDestino(destino);
-				transicionesNuevas.add(transicionAuxiliar);
-			}
-		}
+                int destino = creaEstadoAPartirUnElemento(elementosParaCrearEstado);
+                if (destino == -1) {
+                    System.out.println("Creación del estado fallida");
+                }
 
-		return transicionesNuevas;
-	}
+                transicionAuxiliar.anadirDestino(destino);
+                transicionesNuevas.add(transicionAuxiliar);
+            }
+        }
 
-	public boolean elementoTieneTransicionEnEsaExpresion(Element element, Expression simbolo) {
-		int indiceMarcador = element.indiceMarcador();
+        return transicionesNuevas;
+    }
 
-		if (element.marcadorAlFinal())
-			return false;
-		if (element.production.get(indiceMarcador + 1).expression.equals(simbolo.expression))
-			return true;
+    public boolean elementoTieneTransicionEnEsaExpresion(GrammarElement grammarElement, Expression simbolo) {
+        int indiceMarcador = grammarElement.indiceMarcador();
 
-		return false;
-	}
+        if (grammarElement.marcadorAlFinal()) {
+            return false;
+        }
 
-	public int numeroReglaAPartirElemento(Element element) {
-		int devolver = -1;
+        return grammarElement.getProduction().get(indiceMarcador + 1).expression.equals(simbolo.expression);
+    }
 
-		ArrayList<Expression> produccionRegla = new ArrayList<>();
-		produccionRegla.addAll(element.production);
-		produccionRegla.remove(produccionRegla.size() - 1);
-		Rule reglaAux = new Rule(element.identifier, produccionRegla);
-
-		devolver = grammar.numRule(reglaAux);
-
-		return devolver;
-	}
-
+    public int numeroReglaAPartirElemento(GrammarElement grammarElement) {
+        List<Expression> produccionRegla = new ArrayList<>(grammarElement.getProduction());
+        produccionRegla.remove(produccionRegla.size() - 1);
+        Rule reglaAux = new Rule(grammarElement.getIdentifier(), produccionRegla);
+        return grammar.numRule(reglaAux);
+    }
 }

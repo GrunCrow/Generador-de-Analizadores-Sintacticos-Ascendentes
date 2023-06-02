@@ -1,6 +1,7 @@
 package auxiliares;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Grammar {
 
@@ -24,13 +25,13 @@ public class Grammar {
 			Expression analizar = reg.production.get(0);
 			calculaFirstsRegla(reg, analizar);
 		}
-		unificarPrimeros();
+		unificarFirsts();
 	}
 
 	private void calculaFirstsRegla(Rule rule, Expression expression) {
 
 		if (expression.isTerminal()) {
-			rule.anadirPrimeros(expression.expression);
+			rule.addFirsts(expression.expression);
 		} else {
 			for (Rule regs : rules) {
 				// Buscamos en las reglas con identifciador igual a la expresion noterminal que
@@ -46,7 +47,7 @@ public class Grammar {
 		}
 	}
 
-	private void unificarPrimeros() {
+	private void unificarFirsts() {
 		ArrayList<String> identificadores = getIdentifiers();
 
 		for (String id : identificadores) {
@@ -67,7 +68,7 @@ public class Grammar {
 
 	}
 
-	private void calcularSiguientes() {
+	private void calcularFollows() {
 		ArrayList<String> identificadores = getIdentifiers();
 
 		for (Rule reg : rules) {
@@ -77,7 +78,7 @@ public class Grammar {
 		}
 
 		for (String id : identificadores) {
-			ArrayList<String> aux = calcularSiguienteIdentificador(id);
+			ArrayList<String> aux = calcularNextIdentifier(id);
 
 			for (Rule reg : rules) {
 				if (reg.identifier.equals(id)) {
@@ -87,16 +88,16 @@ public class Grammar {
 		}
 	}
 
-	private ArrayList<String> calcularSiguienteIdentificador(String identificador) {
+	private ArrayList<String> calcularNextIdentifier(String identificador) {
 		ArrayList<String> devolver = new ArrayList<String>();
 
 		for (Rule rule : rules) {
 
-			ArrayList<Expression> prod = rule.production;
+			List<Expression> prod = rule.production;
 
 			for (Expression expr : prod) {
 				if (identificador.equals(expr.expression)) {
-					ArrayList<String> aux = calcularSiguienteIdentificadorRegla(identificador, rule);
+					ArrayList<String> aux = calcularNextIdentifierRule(identificador, rule);
 					devolver = unionConjuntos(devolver, aux);
 				}
 			}
@@ -106,10 +107,10 @@ public class Grammar {
 		return devolver;
 	}
 
-	private ArrayList<String> calcularSiguienteIdentificadorRegla(String identificador, Rule reg) {
+	private ArrayList<String> calcularNextIdentifierRule(String identificador, Rule reg) {
 		ArrayList<String> devolver = new ArrayList<String>();
 
-		ArrayList<Expression> expresiones = reg.production;
+		List<Expression> expresiones = reg.production;
 
 		for (int i = 0; i < expresiones.size(); i++) {
 
@@ -118,7 +119,7 @@ public class Grammar {
 				if (i == expresiones.size() - 1) { // Esta al final de la expresion, añadimos siguientes de el
 													// identificador de la regla.
 					if (!interbloqueo(identificador, reg.identifier)) {
-						ArrayList<String> conjuntoSiguientesDeLaRegla = calcularSiguienteIdentificador(reg.identifier);
+						ArrayList<String> conjuntoSiguientesDeLaRegla = calcularNextIdentifier(reg.identifier);
 						devolver = unionConjuntos(devolver, reg.follows);
 						devolver = unionConjuntos(devolver, conjuntoSiguientesDeLaRegla);
 					}else {
@@ -139,7 +140,7 @@ public class Grammar {
 						if (lambdainFirsts(primerosAgregar)) { // Hay que añadir el primeros y el siguienes de
 																		// la regla que pasamos por parametro
 							// Aqui añadir tambien los siguientes que se supone que lo saco con recursividad
-							ArrayList<String> conjuntoSiguientesDeLaRegla = calcularSiguienteIdentificador(
+							ArrayList<String> conjuntoSiguientesDeLaRegla = calcularNextIdentifier(
 									reg.identifier);
 							devolver = unionConjuntos(devolver, reg.follows);
 							devolver = unionConjuntos(devolver, conjuntoSiguientesDeLaRegla);
@@ -237,27 +238,27 @@ public class Grammar {
 		int numeroRegla = -1;
 
 		for (int i = 0; i < rules.size(); i++) {
-			if (rule.reglasIguales(rules.get(i)))
+			if (rule.equalRules(rules.get(i)))
 				numeroRegla = i;
 		}
 
 		return numeroRegla;
 	}
 	
-	public void insertaLambda() {
+	public void addLambda() {
 
 		for (Rule reg : rules) {
 			if (reg.production.size() == 0) {
-				reg.anadirExpresion("lambda", true);
+				reg.addExpressions("lambda", true);
 			}
 		}
 
 		calcularFirsts();
-		calcularSiguientes();
+		calcularFollows();
 
 	}
 	
-	public void eliminaLambda() {
+	public void removeLambda() {
 		
 		for(Rule reg : rules) {
 			if(reg.production.size() == 1) {
@@ -270,11 +271,10 @@ public class Grammar {
 	}
 
 	public String toString() {
-		String devolver = "";
-
-		for (Rule reg : rules) {
-			devolver += reg.toString() + "\n";
-		}
-		return devolver;
+	    StringBuilder builder = new StringBuilder();
+	    for (Rule reg : rules) {
+	        builder.append(reg.toString()).append("\n");
+	    }
+	    return builder.toString();
 	}
 }

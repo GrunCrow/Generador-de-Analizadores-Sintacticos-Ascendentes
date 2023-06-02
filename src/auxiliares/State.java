@@ -3,51 +3,63 @@ package auxiliares;
 import java.util.*;
 
 public class State {
-	
-	ArrayList<Transition> transiciones;
-	ArrayList<Element> elements; //Reglas punteadas * para ver por donde va la lectura...
+	// TODO Uso de set para evitar duplicados
+	private ArrayList<Transition> transitions;
+	private ArrayList<GrammarElement> grammarElements; //Reglas punteadas * para ver por donde va la lectura...
 	
 	public State() {
-		transiciones = new ArrayList<>();
-		elements = new ArrayList<>();
+		transitions = new ArrayList<>();
+		grammarElements = new ArrayList<>();
 	}
 	
-	public void anadirElemento(Element element) {//Añadimos elementos excluynedo estados repetidos
+	
+	
+	public ArrayList<Transition> getTransiciones() {
+		return transitions;
+	}
+
+
+
+	public ArrayList<GrammarElement> getElements() {
+		return grammarElements;
+	}
+
+
+
+	public void anadirElemento(GrammarElement grammarElement) {//Añadimos elementos excluynedo estados repetidos
 		boolean existeElemento = false;
 		
-		for(Element elementoExistente : elements) {
-			if(element.elementosIguales(elementoExistente))
+		for(GrammarElement elementoExistente : grammarElements) {
+			if(grammarElement.elementosIguales(elementoExistente))
 				existeElemento = true;
 		}
 		if(!existeElemento)
-			elements.add(element);
+			grammarElements.add(grammarElement);
 	}
 	
-	public void anadirTransicion(Transition transition) {//Añadimos transiciones excluyendo repetidas
+	public void anadirTransicion(Transition transition) {
 		boolean existeTransicion = false;
 		
-		for(Transition transicionExistente : transiciones) {
+		// Añadir transiciones excluyendo repetidas
+		for(Transition transicionExistente : transitions) {
 			if(transition.areTransitionsEqual(transicionExistente))
 				existeTransicion = true;
 		}
 		
 		if(!existeTransicion)
-			transiciones.add(transition);
+			transitions.add(transition);
 	}
 	
 	public String toString() {
-		String devolver = "";
-		
-		devolver += "ELEMENTOS: \n";
-		for(Element element : elements) {
-			devolver += element.toString() + "\n";
-		}
-		devolver += "TRANSICIONES: \n";
-		for(Transition transition : transiciones) {
-			devolver += transition.toString() + "\n";
-		}
-		
-		return devolver;
-		
+	    StringBuilder builder = new StringBuilder();
+	    builder.append("ELEMENTS:\n");
+	    for (GrammarElement grammarElement : grammarElements) {
+	        builder.append(grammarElement.toString()).append("\n");
+	    }
+	    builder.append("TRANSITIONS:\n");
+	    for (Transition transition : transitions) {
+	        builder.append(transition.toString()).append("\n");
+	    }
+	    return builder.toString();
 	}
 }

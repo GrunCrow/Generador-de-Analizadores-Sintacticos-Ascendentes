@@ -43,8 +43,6 @@ public class Transition {
 	public int getDestination() {
 		return this.destination;
 	}
-
-
 	
 	public String toString() {
 	    StringBuilder builder = new StringBuilder();

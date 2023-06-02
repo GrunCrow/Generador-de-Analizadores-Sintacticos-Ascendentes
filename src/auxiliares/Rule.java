@@ -1,11 +1,12 @@
 package auxiliares;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Rule {
 
 	String identifier;
-	ArrayList<Expression> production;
+	List<Expression> production;
 	ArrayList<String> firsts;
 	ArrayList<String> follows;
 	
@@ -16,35 +17,23 @@ public class Rule {
 		follows = new ArrayList<>();
 	}
 	
-	public Rule(String identifier, ArrayList<Expression> production) {
+	public Rule(String identifier, List<Expression> produccionRegla) {
 		this.identifier = identifier;
-		this.production = production;
+		this.production = produccionRegla;
 	}
 	
 	
-	public boolean reglasIguales(Rule ruleAnalizar) {
-		
-		if(this.production.size() != ruleAnalizar.production.size())
-			return false;
-		if(!this.identifier.equals(ruleAnalizar.identifier))
-			return false;
-		
-		for(int i=0; i<this.production.size(); i++) {
-			if(!this.production.get(i).expression.equals( ruleAnalizar.production.get(i).expression )) {
-				return false;
-			}
-		}
-		
-		
-		return true;
+	public boolean equalRules(Rule ruleAnalizar) {
+	    return this.identifier.equals(ruleAnalizar.identifier) &&
+	            this.production.equals(ruleAnalizar.production);
 	}
 	
-	public void anadirExpresion(String expression, boolean terminal) {
+	public void addExpressions(String expression, boolean terminal) {
 		Expression aux = new Expression(expression, terminal);
 		production.add(aux);
 	}
 	
-	public void anadirPrimeros(String token) {
+	public void addFirsts(String token) {
 		if(!firsts.contains(token))
 			firsts.add(token);
 	}
@@ -55,6 +44,8 @@ public class Rule {
 	}
 	
 	public String toString() {
-		return identifier + " ->" + production.toString();
+	    StringBuilder builder = new StringBuilder();
+	    builder.append(identifier).append(" ->").append(production.toString());
+	    return builder.toString();
 	}
 }
