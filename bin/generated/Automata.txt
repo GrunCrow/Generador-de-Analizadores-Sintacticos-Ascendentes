@@ -21,7 +21,7 @@ Inicio -> Expr #
 Expr -> Expr # <PLUS> Term 
 Expr -> Expr # <MINUS> Term 
 TRANSICIONES: 
-Reduccion R -1
+Reduccion R -1(Expr)
 <PLUS> -> 2
 <MINUS> -> 10
 , ELEMENTOS: 
@@ -43,7 +43,7 @@ Expr -> Expr <PLUS> Term #
 Term -> Term # <PROD> Factor 
 Term -> Term # <DIV> Factor 
 TRANSICIONES: 
-Reduccion R 1
+Reduccion R 1(Term)
 <PROD> -> 4
 <DIV> -> 12
 , ELEMENTOS: 
@@ -59,11 +59,11 @@ Factor -> 5
 , ELEMENTOS: 
 Term -> Term <PROD> Factor # 
 TRANSICIONES: 
-Reduccion R 4
+Reduccion R 4(Factor)
 , ELEMENTOS: 
 Factor -> <NUM> # 
 TRANSICIONES: 
-Reduccion R 6
+Reduccion R 6(<NUM>)
 , ELEMENTOS: 
 Factor -> <LPAREN> # Expr <RPAREN> 
 Expr -> # Term 
@@ -93,7 +93,7 @@ TRANSICIONES:
 , ELEMENTOS: 
 Factor -> <LPAREN> Expr <RPAREN> # 
 TRANSICIONES: 
-Reduccion R 7
+Reduccion R 7(<RPAREN>)
 , ELEMENTOS: 
 Expr -> Expr <MINUS> # Term 
 Term -> # Factor 
@@ -113,7 +113,7 @@ Expr -> Expr <MINUS> Term #
 Term -> Term # <PROD> Factor 
 Term -> Term # <DIV> Factor 
 TRANSICIONES: 
-Reduccion R 2
+Reduccion R 2(Term)
 <PROD> -> 4
 <DIV> -> 12
 , ELEMENTOS: 
@@ -129,7 +129,7 @@ Factor -> 13
 , ELEMENTOS: 
 Term -> Term <DIV> Factor # 
 TRANSICIONES: 
-Reduccion R 5
+Reduccion R 5(Factor)
 , ELEMENTOS: 
 Factor -> <IDENTIFIER> # <LPAREN> Args <RPAREN> 
 TRANSICIONES: 
@@ -152,7 +152,7 @@ Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN>
 TRANSICIONES: 
 Args -> 16
 ArgumentList -> 18
-Reduccion R 10
+Reduccion R 10(lambda)
 Expr -> 23
 Term -> 21
 Factor -> 22
@@ -166,12 +166,12 @@ TRANSICIONES:
 , ELEMENTOS: 
 Factor -> <IDENTIFIER> <LPAREN> Args <RPAREN> # 
 TRANSICIONES: 
-Reduccion R 8
+Reduccion R 8(<RPAREN>)
 , ELEMENTOS: 
 Args -> ArgumentList # 
 ArgumentList -> ArgumentList # <COMMA> Expr 
 TRANSICIONES: 
-Reduccion R 9
+Reduccion R 9(ArgumentList)
 <COMMA> -> 19
 , ELEMENTOS: 
 ArgumentList -> ArgumentList <COMMA> # Expr 
@@ -196,7 +196,7 @@ ArgumentList -> ArgumentList <COMMA> Expr #
 Expr -> Expr # <PLUS> Term 
 Expr -> Expr # <MINUS> Term 
 TRANSICIONES: 
-Reduccion R 12
+Reduccion R 12(Expr)
 <PLUS> -> 2
 <MINUS> -> 10
 , ELEMENTOS: 
@@ -204,18 +204,19 @@ Expr -> Term #
 Term -> Term # <PROD> Factor 
 Term -> Term # <DIV> Factor 
 TRANSICIONES: 
-Reduccion R 0
+Reduccion R 0(Term)
 <PROD> -> 4
 <DIV> -> 12
 , ELEMENTOS: 
 Term -> Factor # 
 TRANSICIONES: 
-Reduccion R 3
+Reduccion R 3(Factor)
 , ELEMENTOS: 
 ArgumentList -> Expr # 
 Expr -> Expr # <PLUS> Term 
 Expr -> Expr # <MINUS> Term 
 TRANSICIONES: 
-Reduccion R 11
+Reduccion R 11(Expr)
 <PLUS> -> 2
 <MINUS> -> 10
+]

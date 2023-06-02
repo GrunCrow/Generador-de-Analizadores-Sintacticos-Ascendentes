@@ -1,5 +1,9 @@
 package parserjj;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.*;
 
 
@@ -15,7 +19,7 @@ public class AutomataReconocedor {
 		this.gramatica = gramatica;
 	}
 
-	public void creaEstadoCero() {
+	public void creaEstadoCero() throws FileNotFoundException {
 		Regla primeraRegla = gramatica.reglas.get(0);
 
 		ArrayList<Expresion> produccionInicio = new ArrayList<>();
@@ -27,8 +31,16 @@ public class AutomataReconocedor {
 		creaEstadoAPartirUnElemento(elementoParaCreacionEstados);
 
 		System.out.println("SE HA LLEGADO AL FINAL");
-		System.out.println(estados.size());
-		System.out.println(estados.toString());
+		
+		// N estados = 
+		//System.out.println(estados.size());
+		
+		FileOutputStream outputfile = new FileOutputStream(new File("src/generated/Automata.txt"));
+		PrintStream stream = new PrintStream(outputfile);
+		
+		// System.out.println(estados.toString());
+		stream.println(estados.toString());
+		stream.close();
 	}
 
 	// A partir de un elemento saca un nuevo estado, devuelve -1 si lo ha creado, o
