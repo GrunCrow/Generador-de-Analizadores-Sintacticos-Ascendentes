@@ -90,6 +90,11 @@ public class Token {
 	 */
 	public String toString() 
 	{
+		return lexeme;
+	}
+	
+	public String toString_all() 
+	{
 		return "[Row: "+row+"][Column: "+column+"][Kind: "+kind+"] "+lexeme;
 	}
 }

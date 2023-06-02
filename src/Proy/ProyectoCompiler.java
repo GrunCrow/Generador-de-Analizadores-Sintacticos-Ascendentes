@@ -12,68 +12,69 @@ public class ProyectoCompiler {
 	 */
 	public static void main(String[] args)
 	{
-
+		
 		// Busca el directorio de trabajo
-		String path = (args.length == 0 ? System.getProperty("user.dir") : args[0]);
-		File workingdir = new File(path);
+		// String path = (args.length == 0 ? System.getProperty("user.dir") : args[0]);
+		// File workingdir = new File(path);
+		
+		String mainname = "Main.txt";
+		String rutaSalidaLexer = "src/generated/Lexer.txt";
+		String rutaSalida = "src/generated/Salida.txt";
+		
+		File mainfile = new File(mainname);
 		
 		try
 		{
-			FileOutputStream outputfile =  new FileOutputStream(new File(workingdir, "ProyectocOutput1.txt"));
+			FileOutputStream outputfile =  new FileOutputStream(new File(rutaSalidaLexer));
 			PrintStream stream = new PrintStream(outputfile);
 
-			File mainfile = new File(workingdir, "Main.txt");
 			FileInputStream fis = new FileInputStream(mainfile);
-			ProyectoParserTokenManager lexer = new ProyectoParserTokenManager(new SimpleCharStream(fis));
+			GrammarLexer lexer = new GrammarLexer(mainfile); //(new SimpleCharStream(fis));
 			Token tk;
 			do 
 			{
 				tk = lexer.getNextToken();
 				stream.println(tk.toString());
 			} 
-			while(tk.kind != ProyectoParserConstants.EOF);
+			while(tk.getKind() != TokenKind.EOF);
 			
 			stream.close();
 		} 
 		catch(Error err) 
 		{
-			printError(workingdir, err);
+			printError(mainfile, err);
 		}
 		catch(Exception ex) 
 		{
-			printError(workingdir, ex);
+			printError(mainfile, ex);
 		}
 		
 		try
 		{
-			File mainfile = new File(workingdir, "Main.txt");
 			FileInputStream fis = new FileInputStream(mainfile);
-			ProyectoParser parser = new ProyectoParser(fis);
-			parser.Gramatica();
-			printOutput(workingdir,"Correcto");
+			GrammarParser parser = new GrammarParser(mainname); //(fis);
+			parser.parse();
+			printOutput(mainfile ,"Correcto");
 		} 
 		catch(Error err) 
 		{
-			printError(workingdir, err);
-			printOutput(workingdir,"Incorrecto");
+			printError(mainfile, err);
+			printOutput(mainfile,"Incorrecto");
 
 		}
 		catch(Exception ex) 
 		{
-			printError(workingdir, ex);
-			printOutput(workingdir,"Incorrecto");
+			printError(mainfile, ex);
+			printOutput(mainfile,"Incorrecto");
 		}
 	
-		
-		String rutaSintactico = workingdir.getPath() + "/ProyectocOutput2.txt";
+
 		try {
-			if(salidaCorrecta(rutaSintactico)) {
-				String rutaLexico = workingdir.getPath() + "/ProyectocOutput1.txt";
+			if(salidaCorrecta(rutaSalida)) {
 				ProyectoGenerator aux = new ProyectoGenerator();
-				aux.generaSalida(rutaLexico);
+				aux.generaSalida(rutaSalidaLexer);
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -101,9 +102,11 @@ public class ProyectoCompiler {
 	 */
 	private static void printError(File workingdir, Throwable e) 
 	{
+		String rutaSalidaErrores = "src/generated/ProyectocErrors.txt";
+		
 		try 
 		{
-			FileOutputStream errorfile =  new FileOutputStream(new File(workingdir, "ProyectocErrors.txt"));
+			FileOutputStream errorfile =  new FileOutputStream(new File(rutaSalidaErrores));
 			PrintStream errorStream = new PrintStream(errorfile);
 			errorStream.println("[File Main.Proyecto] 1 error found:");
 			errorStream.println(e.toString());
@@ -116,9 +119,11 @@ public class ProyectoCompiler {
 	
 	private static void printOutput(File workingdir, String msg) 
 	{
+		String rutaSalida = "src/generated/Salida.txt";
+		
 		try 
 		{
-			FileOutputStream outputfile =  new FileOutputStream(new File(workingdir, "ProyectocOutput2.txt"));
+			FileOutputStream outputfile =  new FileOutputStream(new File(rutaSalida));
 			PrintStream stream = new PrintStream(outputfile);
 			stream.println(msg);
 			stream.close();
