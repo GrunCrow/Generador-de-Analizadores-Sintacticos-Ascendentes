@@ -3,13 +3,13 @@ package parserjj;
 
 import java.io.*;
 
-import generated.TokenConstants;
+// import generated.TokenConstants;
 
 /**
  * Clase que desarrolla el analizador lexico
  *
  */
-public class GrammarLexer extends Lexer implements TokenConstants {
+public class GrammarLexer extends Lexer {
 
 	/**
 	 * Transiciones del aut�mata del analizador l�xico
@@ -106,9 +106,10 @@ public class GrammarLexer extends Lexer implements TokenConstants {
 	 */
 	protected Token getToken(int state, String lexeme, int row, int column) {
 	    switch (state) {
+	    	// Comentados llos que no se quieren mostrar n contemplar como token
 	    	//case 1: return new Token(TokenKind.BLANCO, lexeme, row, column);
-	        case 5: return new Token(TokenKind.COMENTARIO, lexeme, row, column);
-	        case 7: return new Token(TokenKind.COMENTARIO, lexeme, row, column);
+	        //case 5: return new Token(TokenKind.COMENTARIO, lexeme, row, column);
+	        //case 7: return new Token(TokenKind.COMENTARIO, lexeme, row, column);
 	        case 10: return new Token(TokenKind.TERMINAL, lexeme, row, column);
 	        case 11: return new Token(TokenKind.NOTERMINAL, lexeme, row, column);
 	        case 12: return new Token(TokenKind.SEMICOLON, lexeme, row, column);
@@ -168,9 +169,9 @@ public class GrammarLexer extends Lexer implements TokenConstants {
             
             Token token = lexer.getNextToken();
             while (token.getKind() != TokenKind.EOF) {
-            	//if (token.getKind() != TokenKind.BLANCO) {
+            	if (token.getKind() != TokenKind.COMENTARIO) {
             		System.out.println(token);
-            	//}
+            	}
                 token = lexer.getNextToken();
             }
             

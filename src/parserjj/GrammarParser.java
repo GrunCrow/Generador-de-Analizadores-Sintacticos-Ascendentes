@@ -3,174 +3,82 @@ package parserjj;
 import java.io.File;
 import java.io.IOException;
 
-import parserjj.TokenKind;
 
-/**
- * Analizador sintáctico basado en una gramática BNF y LL(1)
- */
-public class GrammarParser extends SLRParser {
-    /**
-     * Analizador léxico
-     */
-    private GrammarLexer lexer;
+public class GrammarParser {
+    private Lexer lexer;
+    private Token currentToken;
 
-    /**
-     * Siguiente token de la cadena de entrada
-     */
-    private Token nextToken;
-
-    /**
-     * Método de análisis de un fichero
-     *
-     * @param file Fichero a analizar
-     * @return Resultado del análisis sintáctico
-     */
-    public boolean parse(File file) throws IOException, SintaxException {
-        this.lexer = new GrammarLexer(file);
-        this.nextToken = lexer.getNextToken();
-        parseGrammar();
-        if (nextToken.getKind() == TokenKind.EOF)
-            return true;
-        else
-            return false;
-    }
-
-    /**
-     * Analiza el símbolo <Grammar>
-     *
-     * @throws SintaxException
-     */
-    private void parseGrammar() throws SintaxException {
-    	// int val = nextToken.getKind();
-        switch (nextToken.getKind()) {
-            case TokenKind.NOTERMINAL:
-                parseDefinition();
-                parseGrammar();
-                break;
-            case TokenKind.EOF:
-                break;
-            case TokenKind.COMENTARIO:
-            	match(TokenKind.COMENTARIO);
-            	parseGrammar();
-            	break;
-        	case TokenKind.BLANCO:
-            	// no se hace nada, se ignora
-            	match(TokenKind.BLANCO);
-            	parseGrammar();
-            	break;
-            default:
-                int[] expected = { TokenKind.NOTERMINAL, TokenKind.EOF };
-                throw new SintaxException(nextToken, expected);
+    public GrammarParser(String filePath) {
+        try {
+        	File file = new File(filePath);
+            lexer = new GrammarLexer(file);
+            currentToken = lexer.getNextToken();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    /**
-     * Analiza el símbolo <Definition>
-     *
-     * @throws SintaxException
-     */
-    private void parseDefinition() throws SintaxException {
-        match(TokenKind.NOTERMINAL);
-        match(TokenKind.EQ);
-        parseRuleList();
-        match(TokenKind.SEMICOLON);
-    }
-
-    /**
-     * Analiza el símbolo <RuleList>
-     *
-     * @throws SintaxException
-     */
-    private void parseRuleList() throws SintaxException {
-        switch (nextToken.getKind()) {
-            case TokenKind.NOTERMINAL:
-                parseRule();
-                parseRuleListPrime();
-                break;
-            case TokenKind.TERMINAL:
-                parseRule();
-                parseRuleListPrime();
-                break;
-            default:
-                int[] expected = { TokenKind.NOTERMINAL };
-                throw new SintaxException(nextToken, expected);
+    private void consume(int expectedKind) throws ParseException {
+        // si comentario
+    	if (currentToken.getKind() == TokenKind.COMENTARIO) {
+    		// no hacer nada
+    		currentToken = lexer.getNextToken();
+    	}
+    	
+    	if (currentToken.getKind() == expectedKind) {
+            currentToken = lexer.getNextToken();
+    	}
+        else {
+        	throw new ParseException("Expected " + expectedKind + " but found " + currentToken.getKind());
+            
         }
     }
 
-    /**
-     * Analiza el símbolo <RuleListPrime>
-     *
-     * @throws SintaxException
-     */
-    private void parseRuleListPrime() throws SintaxException {
-        switch (nextToken.getKind()) {
-            case TokenKind.BAR:
-                match(TokenKind.BAR);
-                parseRule();
-                parseRuleListPrime();
-                break;
-            case TokenKind.SEMICOLON:
-                break;
-            default:
-                int[] expected = { TokenKind.BAR, TokenKind.SEMICOLON };
-                throw new SintaxException(nextToken, expected);
+    public void parse() throws ParseException {
+        while (currentToken.getKind() != TokenKind.EOF) {
+            definicion();
         }
     }
 
-    /**
-     * Analiza el símbolo <Rule>
-     *
-     * @throws SintaxException
-     */
-    private void parseRule() throws SintaxException {
-        switch (nextToken.getKind()) {
-            case TokenKind.NOTERMINAL:
-            case TokenKind.TERMINAL:
-                parseElement();
-                parseRule();
-                break;
-            case TokenKind.BAR:
-            case TokenKind.SEMICOLON:
-                break;
-            default:
-                int[] expected = { TokenKind.NOTERMINAL, TokenKind.TERMINAL, TokenKind.BAR, TokenKind.SEMICOLON };
-                throw new SintaxException(nextToken, expected);
+    private void definicion() throws ParseException {
+        consume(TokenKind.NOTERMINAL);
+        consume(TokenKind.EQ);
+        listaReglas();
+        consume(TokenKind.SEMICOLON);
+    }
+
+    private void listaReglas() throws ParseException {
+        regla();
+        while (currentToken.getKind() == TokenKind.BAR) {
+            consume(TokenKind.BAR);
+            regla();
         }
     }
 
-    /**
-     * Analiza el símbolo <Element>
-     *
-     * @throws SintaxException
-     */
-    private void parseElement() throws SintaxException {
-        switch (nextToken.getKind()) {
-            case TokenKind.NOTERMINAL:
-                match(TokenKind.NOTERMINAL);
-                break;
-            case TokenKind.TERMINAL:
-                match(TokenKind.TERMINAL);
-                break;
-            default:
-                int[] expected = { TokenKind.NOTERMINAL, TokenKind.TERMINAL };
-                throw new SintaxException(nextToken, expected);
+    private void regla() throws ParseException {
+        while (currentToken.getKind() == TokenKind.NOTERMINAL || currentToken.getKind() == TokenKind.TERMINAL) {
+            if (currentToken.getKind() == TokenKind.NOTERMINAL) {
+                consume(TokenKind.NOTERMINAL);
+            } else {
+                consume(TokenKind.TERMINAL);
+            }
         }
     }
-
-    /**
-     * Método que consume un token de la cadena de entrada
-     *
-     * @param kind Tipo de token a consumir
-     * @throws SintaxException Si el tipo no coincide con el token
-     */
-    private void match(int kind) throws SintaxException {
-        if (nextToken.getKind() == kind)
-            nextToken = lexer.getNextToken();
-        else
-            throw new SintaxException(nextToken, kind);
-    }
-
+    
     public static void main(String[] args) {
+        String filePath = "Main.txt";
+        
+        GrammarParser parser = new GrammarParser(filePath);
+        
+        try {
+            parser.parse();
+            System.out.println("Análisis sintáctico completado exitosamente.");
+        } catch (ParseException e) {
+            System.err.println("Error de análisis sintáctico: " + e.getMessage());
+        }
+    }
+
+    /*public static void main(String[] args) {
         GrammarParser parser = new GrammarParser();
 
         try {
@@ -187,5 +95,5 @@ public class GrammarParser extends SLRParser {
         } catch (SintaxException e) {
             System.out.println("Error de sintaxis en el archivo: " + e.getMessage());
         }
-    }
+    }*/
 }

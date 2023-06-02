@@ -62,16 +62,15 @@ public class SintaxException extends Exception implements TokenConstants {
 	 */
 	private String getLexemeForKind(int kind) {
 		switch(kind) {
-			case NUM: return "NUM";
-			case IDENTIFIER: return "IDENTIFIER";
-			case LPAREN: return "(";
-			case RPAREN: return ")";
-			case COMMA: return "COMMA";
-			case PLUS: return "+";
-			case MINUS: return "-";
-			case PROD: return "*";
-			case DIV: return "/";
+			case TokenKind.EOF: return "EOF";
+			case TokenKind.NOTERMINAL: return "NOTERMINAL";
+			case TokenKind.TERMINAL: return "TERMINAL";
+			case TokenKind.EQ: return "::=";
+			case TokenKind.BAR: return "|";
+			case TokenKind.SEMICOLON: return ";";
+			case TokenKind.COMENTARIO: return " ";
 			default: return "";
+
 		}
 	}
 }

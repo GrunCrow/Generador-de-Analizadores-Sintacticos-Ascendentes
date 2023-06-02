@@ -5,7 +5,9 @@ package parserjj;
  * Elemento de la tabla de acci�n
  */
 public class ActionElement {
-
+	
+	public static final int ERROR = -1;
+	
 	/**
 	 * Constante que identifica un elemento de tipo aceptar
 	 */
