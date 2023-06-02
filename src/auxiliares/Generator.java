@@ -7,14 +7,14 @@ public class Generator {
 
 	ArrayList<String> symbols;
 	ArrayList<String> tokens;
-	Gramatica gramatica;
-	AutomataReconocedor automata;
+	Grammar grammar;
+	Automaton automata;
 
 	public Generator() {
 		symbols = new ArrayList<String>();
 		tokens = new ArrayList<String>();
-		gramatica = new Gramatica();
-		automata = new AutomataReconocedor(gramatica);
+		grammar = new Grammar();
+		automata = new Automaton(grammar);
 	}
 
 	public void generaSalida(String ruta) throws IOException {
@@ -22,7 +22,7 @@ public class Generator {
 		generaTokenConstants();
 		generaSymbolConstants();
 		
-		gramatica.eliminaLambda();
+		grammar.eliminaLambda();
 		automata.creaEstadoCero();
 		generaParser();
 	}
@@ -46,8 +46,8 @@ public class Generator {
 					nuevoIdentificador = false;
 					agregarExpresion = false;
 				}
-				Regla aux = new Regla(identificador);
-				gramatica.anadirRegla(aux);
+				Rule aux = new Rule(identificador);
+				grammar.addRule(aux);
 				empiezaRegla = false;
 			}
 			// Generamos TokenConstant y SymbolConstant y
@@ -64,7 +64,7 @@ public class Generator {
 				}
 
 				if (agregarExpresion) { // Agregar la expresion a la ultima regla de la gramatica
-					gramatica.reglas.get(gramatica.reglas.size() - 1).anadirExpresion(linea, terminal);
+					grammar.rules.get(grammar.rules.size() - 1).anadirExpresion(linea, terminal);
 				}
 				agregarExpresion = true;
 			} else {
@@ -144,24 +144,24 @@ public class Generator {
 			
 			
 			
-			Gramatica gramaticaConLambda = gramatica;
+			Grammar gramaticaConLambda = grammar;
 			gramaticaConLambda.insertaLambda();
 			
 			stream.println(gramaticaConLambda.toString());
 			stream.println("CONJUNTO PRIMEROS");
 			String identificador = "";
-			for (Regla reg : gramaticaConLambda.reglas) {
-				if(!identificador.equals(reg.identificador)) {
-					stream.println(reg.toString() + "PRIMEROS(" + reg.primeros.toString() + ")");
-					identificador = reg.identificador;
+			for (Rule reg : gramaticaConLambda.rules) {
+				if(!identificador.equals(reg.identifier)) {
+					stream.println(reg.toString() + "PRIMEROS(" + reg.firsts.toString() + ")");
+					identificador = reg.identifier;
 				}
 			}
 			
 			stream.println("\nCONJUNTO SIGUIENTES");
-			for (Regla reg : gramaticaConLambda.reglas) {
-				if(!identificador.equals(reg.identificador)) {
-					stream.println(reg.toString() + "SIGUIENTES(" + reg.siguientes.toString() + ")");
-					identificador = reg.identificador;
+			for (Rule reg : gramaticaConLambda.rules) {
+				if(!identificador.equals(reg.identifier)) {
+					stream.println(reg.toString() + "SIGUIENTES(" + reg.follows.toString() + ")");
+					identificador = reg.identifier;
 				}
 			}
 			stream.close();
@@ -199,8 +199,8 @@ public class Generator {
 					+ "\t\t\t\t{ 0, 0 },");
 			
 			// Reglas
-			for (Regla reg : gramatica.reglas) { 
-				stream.println("\t\t\t\t{ " + reg.identificador + ", " + reg.produccion.size() + " },");
+			for (Rule reg : grammar.rules) { 
+				stream.println("\t\t\t\t{ " + reg.identifier + ", " + reg.production.size() + " },");
 			}
 			
 			//Cerrar InitRule
@@ -210,10 +210,10 @@ public class Generator {
 			// Empezamos con ActionTable
 			stream.println("\tprivate void initActionTable(){");
 				//Tamano de la tabla ActionTable
-			stream.println("\t\tactionTable = new ActionElement["+ automata.estados.size() +"]["+ tokens.size() +"];");
+			stream.println("\t\tactionTable = new ActionElement["+ automata.states.size() +"]["+ tokens.size() +"];");
 				//Bucle que agrega a la tabla la informacion cuando es necesaria segund los estados.
-			for (int i=0; i< automata.estados.size() ; i++) {
-				stream.print(sacaInformacionActionTable(automata.estados.get(i), i));
+			for (int i=0; i< automata.states.size() ; i++) {
+				stream.print(sacaInformacionActionTable(automata.states.get(i), i));
 			}
 			//Cerramos ActionTable
 			stream.println("\t}\n");
@@ -222,10 +222,10 @@ public class Generator {
 			// Empezar con GotoTable()
 			stream.println("\tprivate void initGotoTable() {");
 				// Tamano de la tabla con los valors de symbols y estados.
-			stream.println("\t\tgotoTable = new int[" + automata.estados.size() + "][" + symbols.size() + "];");
+			stream.println("\t\tgotoTable = new int[" + automata.states.size() + "][" + symbols.size() + "];");
 				// Bucle que agrega informacion cuando es necesaria segun el estado
-			for (int i=0; i< automata.estados.size() ; i++) {
-				stream.print(sacaInformacionGoToEstado(automata.estados.get(i), i ));
+			for (int i=0; i< automata.states.size() ; i++) {
+				stream.print(sacaInformacionGoToEstado(automata.states.get(i), i ));
 			}
 			//Cerramos GoToTable
 			stream.println("\t}\n");
@@ -241,16 +241,16 @@ public class Generator {
 
 	}
 
-	private String sacaInformacionActionTable(Estado estado, int numEstado) {
+	private String sacaInformacionActionTable(State state, int numEstado) {
 		String devolver = "";
-		ArrayList<Transicion> transicionesEstado = estado.transiciones;
+		ArrayList<Transition> transicionesEstado = state.transiciones;
 
-		for(Transicion transicion : transicionesEstado) {
-			if(transicion.origen.terminal) {
-				if(transicion.reduccion) {//Si es reduccion o desplazamiento...
-					devolver += generaReduccionActionTable(transicion, numEstado);
+		for(Transition transition : transicionesEstado) {
+			if(transition.getSource().terminal) {
+				if(transition.isReduce()) {//Si es reduccion o desplazamiento...
+					devolver += generaReduccionActionTable(transition, numEstado);
 				}else {//Es desplazamiento
-					devolver += "\n\t\tactionTable["+ numEstado +"]["+ eliminaCuadrilla(transicion.origen.expresion) +"] = new ActionElement(ActionElement.SHIFT, "+ transicion.destino +");";	
+					devolver += "\n\t\tactionTable["+ numEstado +"]["+ eliminaCuadrilla(transition.getSource().expression) +"] = new ActionElement(ActionElement.SHIFT, "+ transition.getDestination() +");";	
 				}				
 			}
 		}
@@ -262,15 +262,15 @@ public class Generator {
 		return devolver;
 	}
 	
-	private String generaReduccionActionTable(Transicion transicion, int numEstado) {
+	private String generaReduccionActionTable(Transition transition, int numEstado) {
 		String devolver = "";
 		
-		if(transicion.destino == -1) {
+		if(transition.getDestination() == -1) {
 			devolver +="\n\t\tactionTable["+ numEstado +"][EOF] = new ActionElement(ActionElement.ACCEPT, 0);";
 		}else {
-			ArrayList<String> siguientes = gramatica.reglas.get(transicion.destino).siguientes;
+			ArrayList<String> siguientes = grammar.rules.get(transition.getDestination()).follows;
 			for(String siguiente : siguientes) {
-				devolver += "\n\t\tactionTable["+ numEstado +"]["+ eliminaCuadrilla(siguiente) +"] = new ActionElement(ActionElement.REDUCE, "+ (transicion.destino+1) +");";
+				devolver += "\n\t\tactionTable["+ numEstado +"]["+ eliminaCuadrilla(siguiente) +"] = new ActionElement(ActionElement.REDUCE, "+ (transition.getDestination()+1) +");";
 			}		
 		}		
 		return devolver;
@@ -280,13 +280,13 @@ public class Generator {
 		return terminal.substring(1, terminal.length()-1);
 	}
 	
-	private String sacaInformacionGoToEstado(Estado estado, int numEstado) {
+	private String sacaInformacionGoToEstado(State state, int numEstado) {
 		String devolver = "";
-		ArrayList<Transicion> transicionesEstado = estado.transiciones;
+		ArrayList<Transition> transicionesEstado = state.transiciones;
 		
-		for(Transicion transicion : transicionesEstado) {
-			if(!transicion.origen.terminal) {
-				devolver += "\n\t\tgotoTable[" + numEstado + "][" + transicion.origen.expresion + "] = " + transicion.destino + ";";
+		for(Transition transition : transicionesEstado) {
+			if(!transition.getSource().terminal) {
+				devolver += "\n\t\tgotoTable[" + numEstado + "][" + transition.getSource().expression + "] = " + transition.getDestination() + ";";
 			}
 		}
 		

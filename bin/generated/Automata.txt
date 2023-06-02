@@ -1,14 +1,14 @@
 [ELEMENTOS: 
-Inicio -> # Expr 
-Expr -> # Term 
-Expr -> # Expr <PLUS> Term 
-Expr -> # Expr <MINUS> Term 
-Term -> # Factor 
-Term -> # Term <PROD> Factor 
-Term -> # Term <DIV> Factor 
-Factor -> # <NUM> 
-Factor -> # <LPAREN> Expr <RPAREN> 
-Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+Inicio -> . Expr 
+Expr -> . Term 
+Expr -> . Expr <PLUS> Term 
+Expr -> . Expr <MINUS> Term 
+Term -> . Factor 
+Term -> . Term <PROD> Factor 
+Term -> . Term <DIV> Factor 
+Factor -> . <NUM> 
+Factor -> . <LPAREN> Expr <RPAREN> 
+Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
 TRANSICIONES: 
 Expr -> 1
 Term -> 21
@@ -17,21 +17,21 @@ Factor -> 22
 <LPAREN> -> 7
 <IDENTIFIER> -> 14
 , ELEMENTOS: 
-Inicio -> Expr # 
-Expr -> Expr # <PLUS> Term 
-Expr -> Expr # <MINUS> Term 
+Inicio -> Expr . 
+Expr -> Expr . <PLUS> Term 
+Expr -> Expr . <MINUS> Term 
 TRANSICIONES: 
-Reduccion R -1(Expr)
+Reduce R -1(Expr)
 <PLUS> -> 2
 <MINUS> -> 10
 , ELEMENTOS: 
-Expr -> Expr <PLUS> # Term 
-Term -> # Factor 
-Term -> # Term <PROD> Factor 
-Term -> # Term <DIV> Factor 
-Factor -> # <NUM> 
-Factor -> # <LPAREN> Expr <RPAREN> 
-Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+Expr -> Expr <PLUS> . Term 
+Term -> . Factor 
+Term -> . Term <PROD> Factor 
+Term -> . Term <DIV> Factor 
+Factor -> . <NUM> 
+Factor -> . <LPAREN> Expr <RPAREN> 
+Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
 TRANSICIONES: 
 Term -> 3
 Factor -> 22
@@ -39,42 +39,42 @@ Factor -> 22
 <LPAREN> -> 7
 <IDENTIFIER> -> 14
 , ELEMENTOS: 
-Expr -> Expr <PLUS> Term # 
-Term -> Term # <PROD> Factor 
-Term -> Term # <DIV> Factor 
+Expr -> Expr <PLUS> Term . 
+Term -> Term . <PROD> Factor 
+Term -> Term . <DIV> Factor 
 TRANSICIONES: 
-Reduccion R 1(Term)
+Reduce R 1(Term)
 <PROD> -> 4
 <DIV> -> 12
 , ELEMENTOS: 
-Term -> Term <PROD> # Factor 
-Factor -> # <NUM> 
-Factor -> # <LPAREN> Expr <RPAREN> 
-Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+Term -> Term <PROD> . Factor 
+Factor -> . <NUM> 
+Factor -> . <LPAREN> Expr <RPAREN> 
+Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
 TRANSICIONES: 
 Factor -> 5
 <NUM> -> 6
 <LPAREN> -> 7
 <IDENTIFIER> -> 14
 , ELEMENTOS: 
-Term -> Term <PROD> Factor # 
+Term -> Term <PROD> Factor . 
 TRANSICIONES: 
-Reduccion R 4(Factor)
+Reduce R 4(Factor)
 , ELEMENTOS: 
-Factor -> <NUM> # 
+Factor -> <NUM> . 
 TRANSICIONES: 
-Reduccion R 6(<NUM>)
+Reduce R 6(<NUM>)
 , ELEMENTOS: 
-Factor -> <LPAREN> # Expr <RPAREN> 
-Expr -> # Term 
-Expr -> # Expr <PLUS> Term 
-Expr -> # Expr <MINUS> Term 
-Term -> # Factor 
-Term -> # Term <PROD> Factor 
-Term -> # Term <DIV> Factor 
-Factor -> # <NUM> 
-Factor -> # <LPAREN> Expr <RPAREN> 
-Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+Factor -> <LPAREN> . Expr <RPAREN> 
+Expr -> . Term 
+Expr -> . Expr <PLUS> Term 
+Expr -> . Expr <MINUS> Term 
+Term -> . Factor 
+Term -> . Term <PROD> Factor 
+Term -> . Term <DIV> Factor 
+Factor -> . <NUM> 
+Factor -> . <LPAREN> Expr <RPAREN> 
+Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
 TRANSICIONES: 
 Expr -> 8
 Term -> 21
@@ -83,25 +83,25 @@ Factor -> 22
 <LPAREN> -> 7
 <IDENTIFIER> -> 14
 , ELEMENTOS: 
-Factor -> <LPAREN> Expr # <RPAREN> 
-Expr -> Expr # <PLUS> Term 
-Expr -> Expr # <MINUS> Term 
+Factor -> <LPAREN> Expr . <RPAREN> 
+Expr -> Expr . <PLUS> Term 
+Expr -> Expr . <MINUS> Term 
 TRANSICIONES: 
 <RPAREN> -> 9
 <PLUS> -> 2
 <MINUS> -> 10
 , ELEMENTOS: 
-Factor -> <LPAREN> Expr <RPAREN> # 
+Factor -> <LPAREN> Expr <RPAREN> . 
 TRANSICIONES: 
-Reduccion R 7(<RPAREN>)
+Reduce R 7(<RPAREN>)
 , ELEMENTOS: 
-Expr -> Expr <MINUS> # Term 
-Term -> # Factor 
-Term -> # Term <PROD> Factor 
-Term -> # Term <DIV> Factor 
-Factor -> # <NUM> 
-Factor -> # <LPAREN> Expr <RPAREN> 
-Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+Expr -> Expr <MINUS> . Term 
+Term -> . Factor 
+Term -> . Term <PROD> Factor 
+Term -> . Term <DIV> Factor 
+Factor -> . <NUM> 
+Factor -> . <LPAREN> Expr <RPAREN> 
+Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
 TRANSICIONES: 
 Term -> 11
 Factor -> 22
@@ -109,50 +109,50 @@ Factor -> 22
 <LPAREN> -> 7
 <IDENTIFIER> -> 14
 , ELEMENTOS: 
-Expr -> Expr <MINUS> Term # 
-Term -> Term # <PROD> Factor 
-Term -> Term # <DIV> Factor 
+Expr -> Expr <MINUS> Term . 
+Term -> Term . <PROD> Factor 
+Term -> Term . <DIV> Factor 
 TRANSICIONES: 
-Reduccion R 2(Term)
+Reduce R 2(Term)
 <PROD> -> 4
 <DIV> -> 12
 , ELEMENTOS: 
-Term -> Term <DIV> # Factor 
-Factor -> # <NUM> 
-Factor -> # <LPAREN> Expr <RPAREN> 
-Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+Term -> Term <DIV> . Factor 
+Factor -> . <NUM> 
+Factor -> . <LPAREN> Expr <RPAREN> 
+Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
 TRANSICIONES: 
 Factor -> 13
 <NUM> -> 6
 <LPAREN> -> 7
 <IDENTIFIER> -> 14
 , ELEMENTOS: 
-Term -> Term <DIV> Factor # 
+Term -> Term <DIV> Factor . 
 TRANSICIONES: 
-Reduccion R 5(Factor)
+Reduce R 5(Factor)
 , ELEMENTOS: 
-Factor -> <IDENTIFIER> # <LPAREN> Args <RPAREN> 
+Factor -> <IDENTIFIER> . <LPAREN> Args <RPAREN> 
 TRANSICIONES: 
 <LPAREN> -> 15
 , ELEMENTOS: 
-Factor -> <IDENTIFIER> <LPAREN> # Args <RPAREN> 
-Args -> # ArgumentList 
-Args -> # 
-ArgumentList -> # Expr 
-ArgumentList -> # ArgumentList <COMMA> Expr 
-Expr -> # Term 
-Expr -> # Expr <PLUS> Term 
-Expr -> # Expr <MINUS> Term 
-Term -> # Factor 
-Term -> # Term <PROD> Factor 
-Term -> # Term <DIV> Factor 
-Factor -> # <NUM> 
-Factor -> # <LPAREN> Expr <RPAREN> 
-Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+Factor -> <IDENTIFIER> <LPAREN> . Args <RPAREN> 
+Args -> . ArgumentList 
+Args -> . 
+ArgumentList -> . Expr 
+ArgumentList -> . ArgumentList <COMMA> Expr 
+Expr -> . Term 
+Expr -> . Expr <PLUS> Term 
+Expr -> . Expr <MINUS> Term 
+Term -> . Factor 
+Term -> . Term <PROD> Factor 
+Term -> . Term <DIV> Factor 
+Factor -> . <NUM> 
+Factor -> . <LPAREN> Expr <RPAREN> 
+Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
 TRANSICIONES: 
 Args -> 16
 ArgumentList -> 18
-Reduccion R 10(lambda)
+Reduce R 10(lambda)
 Expr -> 23
 Term -> 21
 Factor -> 22
@@ -160,30 +160,30 @@ Factor -> 22
 <LPAREN> -> 7
 <IDENTIFIER> -> 14
 , ELEMENTOS: 
-Factor -> <IDENTIFIER> <LPAREN> Args # <RPAREN> 
+Factor -> <IDENTIFIER> <LPAREN> Args . <RPAREN> 
 TRANSICIONES: 
 <RPAREN> -> 17
 , ELEMENTOS: 
-Factor -> <IDENTIFIER> <LPAREN> Args <RPAREN> # 
+Factor -> <IDENTIFIER> <LPAREN> Args <RPAREN> . 
 TRANSICIONES: 
-Reduccion R 8(<RPAREN>)
+Reduce R 8(<RPAREN>)
 , ELEMENTOS: 
-Args -> ArgumentList # 
-ArgumentList -> ArgumentList # <COMMA> Expr 
+Args -> ArgumentList . 
+ArgumentList -> ArgumentList . <COMMA> Expr 
 TRANSICIONES: 
-Reduccion R 9(ArgumentList)
+Reduce R 9(ArgumentList)
 <COMMA> -> 19
 , ELEMENTOS: 
-ArgumentList -> ArgumentList <COMMA> # Expr 
-Expr -> # Term 
-Expr -> # Expr <PLUS> Term 
-Expr -> # Expr <MINUS> Term 
-Term -> # Factor 
-Term -> # Term <PROD> Factor 
-Term -> # Term <DIV> Factor 
-Factor -> # <NUM> 
-Factor -> # <LPAREN> Expr <RPAREN> 
-Factor -> # <IDENTIFIER> <LPAREN> Args <RPAREN> 
+ArgumentList -> ArgumentList <COMMA> . Expr 
+Expr -> . Term 
+Expr -> . Expr <PLUS> Term 
+Expr -> . Expr <MINUS> Term 
+Term -> . Factor 
+Term -> . Term <PROD> Factor 
+Term -> . Term <DIV> Factor 
+Factor -> . <NUM> 
+Factor -> . <LPAREN> Expr <RPAREN> 
+Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
 TRANSICIONES: 
 Expr -> 20
 Term -> 21
@@ -192,31 +192,31 @@ Factor -> 22
 <LPAREN> -> 7
 <IDENTIFIER> -> 14
 , ELEMENTOS: 
-ArgumentList -> ArgumentList <COMMA> Expr # 
-Expr -> Expr # <PLUS> Term 
-Expr -> Expr # <MINUS> Term 
+ArgumentList -> ArgumentList <COMMA> Expr . 
+Expr -> Expr . <PLUS> Term 
+Expr -> Expr . <MINUS> Term 
 TRANSICIONES: 
-Reduccion R 12(Expr)
+Reduce R 12(Expr)
 <PLUS> -> 2
 <MINUS> -> 10
 , ELEMENTOS: 
-Expr -> Term # 
-Term -> Term # <PROD> Factor 
-Term -> Term # <DIV> Factor 
+Expr -> Term . 
+Term -> Term . <PROD> Factor 
+Term -> Term . <DIV> Factor 
 TRANSICIONES: 
-Reduccion R 0(Term)
+Reduce R 0(Term)
 <PROD> -> 4
 <DIV> -> 12
 , ELEMENTOS: 
-Term -> Factor # 
+Term -> Factor . 
 TRANSICIONES: 
-Reduccion R 3(Factor)
+Reduce R 3(Factor)
 , ELEMENTOS: 
-ArgumentList -> Expr # 
-Expr -> Expr # <PLUS> Term 
-Expr -> Expr # <MINUS> Term 
+ArgumentList -> Expr . 
+Expr -> Expr . <PLUS> Term 
+Expr -> Expr . <MINUS> Term 
 TRANSICIONES: 
-Reduccion R 11(Expr)
+Reduce R 11(Expr)
 <PLUS> -> 2
 <MINUS> -> 10
 ]

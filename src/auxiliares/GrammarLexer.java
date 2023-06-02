@@ -121,37 +121,6 @@ public class GrammarLexer extends Lexer {
 
 	
 	/**
-	 * Estudia si un identificador corresponde a una palabra clave del lenguaje
-	 * y devuelve el c�digo del token adecuado
-	 * @param id
-	 * @return
-	 */
-	private int getKind(String lexeme) {
-	    /*if (lexeme.matches("<[_a-zA-Z][_a-zA-Z0-9]*>")) {
-	        return TokenKind.TERMINAL;
-	    } else if (lexeme.matches("[_a-zA-Z][_a-zA-Z0-9]*")) {
-	        return TokenKind.NOTERMINAL;
-	    } else if (lexeme.equals("::=")) {
-	        return TokenKind.EQ;
-	    } else if (lexeme.equals("|")) {
-	        return TokenKind.BAR;
-	    } else if (lexeme.equals(";")) {
-	        return TokenKind.SEMICOLON;
-	    } else if (lexeme.matches("\\s+")) {
-	        return TokenKind.BLANCO; */
-	    //} else if (lexeme.matches("/\\*(.|\\n)*?\\*/")) {
-		/*    return TokenKind.COMENTARIO;
-	    } else {
-	        return TokenKind.UNKNOWN;
-	    }*/
-	
-		return TokenKind.UNKNOWN;
-	}
-
-
-
-	
-	/**
 	 * Constructor
 	 * @param filename Nombre del fichero fuente
 	 * @throws IOException En caso de problemas con el flujo de entrada
