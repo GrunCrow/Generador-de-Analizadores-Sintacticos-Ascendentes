@@ -3,8 +3,6 @@ package auxiliares;
 
 import java.io.*;
 
-// import generated.TokenConstants;
-
 /**
  * Clase que desarrolla el analizador lexico
  *
@@ -12,10 +10,10 @@ import java.io.*;
 public class GrammarLexer extends Lexer {
 
 	/**
-	 * Transiciones del aut�mata del analizador l�xico
+	 * Transiciones del automata del analizador lexico
 	 * 
 	 * @param state Estado inicial
-	 * @param symbol S�mbolo del alfabeto
+	 * @param symbol Simbolo del alfabeto
 	 * @return Estado final
 	 */
 	protected int transition(int state, char symbol) {
@@ -94,8 +92,8 @@ public class GrammarLexer extends Lexer {
 
 	
 	/**
-	 * Genera el componente l�xico correspondiente al estado final y
-	 * al lexema encontrado. Devuelve null si la acci�n asociada al
+	 * Genera el componente lexico correspondiente al estado final y
+	 * al lexema encontrado. Devuelve null si la accion asociada al
 	 * estado final es omitir (SKIP).
 	 * 
 	 * @param state Estado final alcanzado
@@ -106,7 +104,7 @@ public class GrammarLexer extends Lexer {
 	 */
 	protected Token getToken(int state, String lexeme, int row, int column) {
 	    switch (state) {
-	    	// Comentados llos que no se quieren mostrar n contemplar como token
+	    	// Comentados los que no se quieren mostrar ni contemplar como token -> se van a ignorar: blancos, comentarios
 	    	//case 1: return new Token(TokenKind.BLANCO, lexeme, row, column);
 	        //case 5: return new Token(TokenKind.COMENTARIO, lexeme, row, column);
 	        //case 7: return new Token(TokenKind.COMENTARIO, lexeme, row, column);
