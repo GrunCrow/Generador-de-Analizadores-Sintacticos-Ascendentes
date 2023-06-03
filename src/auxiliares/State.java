@@ -5,7 +5,8 @@ import java.util.*;
 public class State {
 	// TODO Uso de set para evitar duplicados
 	private ArrayList<Transition> transitions;
-	private ArrayList<GrammarElement> grammarElements; //Reglas punteadas * para ver por donde va la lectura...
+	//Reglas punteadas * para ver por donde va la lectura...
+	private ArrayList<GrammarElement> grammarElements; 
 	
 	public State() {
 		transitions = new ArrayList<>();
@@ -26,27 +27,27 @@ public class State {
 
 
 
-	public void anadirElemento(GrammarElement grammarElement) {//Añadimos elementos excluynedo estados repetidos
+	public void addElement(GrammarElement grammarElement) {//Añadimos elementos excluynedo estados repetidos
 		boolean existeElemento = false;
 		
 		for(GrammarElement elementoExistente : grammarElements) {
-			if(grammarElement.elementosIguales(elementoExistente))
+			if(grammarElement.isEqualElement(elementoExistente))
 				existeElemento = true;
 		}
 		if(!existeElemento)
 			grammarElements.add(grammarElement);
 	}
 	
-	public void anadirTransicion(Transition transition) {
-		boolean existeTransicion = false;
+	public void addTransition(Transition transition) {
+		boolean transitionExists = false;
 		
 		// Añadir transiciones excluyendo repetidas
-		for(Transition transicionExistente : transitions) {
-			if(transition.areTransitionsEqual(transicionExistente))
-				existeTransicion = true;
+		for(Transition existingTransition : transitions) {
+			if(transition.areTransitionsEqual(existingTransition))
+				transitionExists = true;
 		}
 		
-		if(!existeTransicion)
+		if(!transitionExists)
 			transitions.add(transition);
 	}
 	

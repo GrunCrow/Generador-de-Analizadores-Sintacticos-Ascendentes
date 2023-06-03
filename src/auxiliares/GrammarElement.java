@@ -43,7 +43,7 @@ public class GrammarElement {
 	}
 
 	public boolean adelantaCursor() {
-		int indice = indiceMarcador();
+		int indice = markerIdx();
 		
 		if(production.size()-1 > indice) {
 			Expression aux = production.get(indice+1);
@@ -54,27 +54,27 @@ public class GrammarElement {
 		return false;
 	}
 	
-	public int indiceMarcador() {
-		int indice = -1;
+	public int markerIdx() {
+		int idx = -1;
 		
 		for(int i=0; i<production.size(); i++) {
 			if(production.get(i).expression.equals("."))
-				indice = i;
+				idx = i;
 		}
 		
-		return indice;
+		return idx;
 	}
 	
-	public boolean marcadorAlFinal() {
-		int indiceMarcador = indiceMarcador();
+	public boolean markerAtEnd() {
+		int idx = markerIdx();
 		
-		if(indiceMarcador == production.size()-1)
+		if(idx == production.size()-1)
 			return true;
 			
 		return false;
 	}
 	
-	public boolean elementosIguales(GrammarElement elementAnalizar) {
+	public boolean isEqualElement(GrammarElement elementAnalizar) {
 		
 		if(this.production.size() != elementAnalizar.production.size())
 			return false;
@@ -90,13 +90,13 @@ public class GrammarElement {
 	
 	
 	public String toString() {
-		String devolver = identifier + " -> ";
+		String toReturn = identifier + " -> ";
 		
 		for(Expression expression : production) {
-			devolver += expression.expression + " ";
+			toReturn += expression.expression + " ";
 		}
 		
 		
-		return devolver;
+		return toReturn;
 	}
 }

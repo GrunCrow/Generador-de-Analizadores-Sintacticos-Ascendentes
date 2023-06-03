@@ -18,11 +18,9 @@ public class Automaton {
     }
 
     
-    
     public List<State> getStates() {
 		return states;
 	}
-
 
 
 	public Grammar getGrammar() {
@@ -30,83 +28,82 @@ public class Automaton {
 	}
 
 
+	public void createState0() throws FileNotFoundException {
+        Rule firstRule = grammar.rules.get(0);
 
-	public void creaEstadoCero() throws FileNotFoundException {
-        Rule primeraRegla = grammar.rules.get(0);
+        List<Expression> initProduction = new ArrayList<>();
+        initProduction.add(new Expression(firstRule.identifier, false));
+        GrammarElement firstElement = new GrammarElement("Inicio", initProduction, false);
+        List<GrammarElement> stateElements = new ArrayList<>();
+        stateElements.add(firstElement);
 
-        List<Expression> produccionInicio = new ArrayList<>();
-        produccionInicio.add(new Expression(primeraRegla.identifier, false));
-        GrammarElement primerElemento = new GrammarElement("Inicio", produccionInicio, false);
-        List<GrammarElement> elementoParaCreacionEstados = new ArrayList<>();
-        elementoParaCreacionEstados.add(primerElemento);
+        createStateFromElement(stateElements);
 
-        creaEstadoAPartirUnElemento(elementoParaCreacionEstados);
-
-        System.out.println("Final Alcanzado");
+        System.out.println("Final Alcanzado\n");
 
         try (PrintStream stream = new PrintStream(new FileOutputStream(new File("src/generated/Automata.txt")))) {
             stream.println(states.toString());
         }
     }
 
-    public int creaEstadoAPartirUnElemento(List<GrammarElement> elementosPartida) {
-        State nuevoEstado = new State();
+    public int createStateFromElement(List<GrammarElement> startingElements) {
+        State newStates = new State();
 
-        int numElementosAnadidos = 0;
-        for (GrammarElement elementoPartida : elementosPartida) {
-            nuevoEstado.anadirElemento(elementoPartida);
+        int newAddedElements = 0;
+        for (GrammarElement startingElement : startingElements) {
+            newStates.addElement(startingElement);
             int i = 0;
             do {
-                List<GrammarElement> elementosAnadir = elementosNuevosPartiendoElementoActualMarcado(nuevoEstado.getElements().get(i + numElementosAnadidos));
-                for (GrammarElement anadir : elementosAnadir) {
-                    nuevoEstado.anadirElemento(anadir);
+                List<GrammarElement> toAddElements = newElementsFromMarkedElement(newStates.getElements().get(i + newAddedElements));
+                for (GrammarElement toAddElement : toAddElements) {
+                    newStates.addElement(toAddElement);
                 }
                 i++;
-            } while (nuevoEstado.getElements().size() - numElementosAnadidos > i);
-            numElementosAnadidos += i;
+            } while (newStates.getElements().size() - newAddedElements > i);
+            newAddedElements += i;
         }
 
-        int posicionEstado = existeEstado(nuevoEstado);
-        if (posicionEstado != -1) {
-            return posicionEstado;
+        int statePos = existsStates(newStates);
+        if (statePos != -1) {
+            return statePos;
         }
 
-        states.add(nuevoEstado);
-        int posicionEstadoAnadido = states.size() - 1;
+        states.add(newStates);
+        int addedStatePos = states.size() - 1;
 
-        List<Transition> transicionesEstado = transicionesPosiblesEnUnEstado(states.get(posicionEstadoAnadido));
-        for (Transition transition : transicionesEstado) {
-            states.get(posicionEstadoAnadido).anadirTransicion(transition);
+        List<Transition> stateTransitions = possibleTransitionsInState(states.get(addedStatePos));
+        for (Transition transition : stateTransitions) {
+            states.get(addedStatePos).addTransition(transition);
         }
 
-        return posicionEstadoAnadido;
+        return addedStatePos;
     }
 
-    public int existeEstado(State state) {
+    public int existsStates(State state) {
         for (int i = 0; i < states.size(); i++) {
-            if (estadosIguales(state, states.get(i))) {
+            if (equalStates(state, states.get(i))) {
                 return i;
             }
         }
         return -1;
     }
 
-    public boolean estadosIguales(State estado1, State estado2) {
-        if (estado1.getElements().size() != estado2.getElements().size()) {
+    public boolean equalStates(State state1, State state2) {
+        if (state1.getElements().size() != state2.getElements().size()) {
             return false;
         }
 
-        for (GrammarElement elemento1 : estado1.getElements()) {
-            boolean existeElemento = false;
+        for (GrammarElement element1 : state1.getElements()) {
+            boolean elementExists = false;
 
-            for (GrammarElement elemento2 : estado2.getElements()) {
-                if (elemento1.elementosIguales(elemento2)) {
-                    existeElemento = true;
+            for (GrammarElement element2 : state2.getElements()) {
+                if (element1.isEqualElement(element2)) {
+                    elementExists = true;
                     break;
                 }
             }
 
-            if (!existeElemento) {
+            if (!elementExists) {
                 return false;
             }
         }
@@ -114,86 +111,86 @@ public class Automaton {
         return true;
     }
 
-    public List<GrammarElement> elementosNuevosPartiendoElementoActualMarcado(GrammarElement elementoAnalizar) {
-        List<GrammarElement> devolver = new ArrayList<>();
-        int indiceMarcador = elementoAnalizar.indiceMarcador();
+    public List<GrammarElement> newElementsFromMarkedElement(GrammarElement elementToAnalyze) {
+        List<GrammarElement> returnElements = new ArrayList<>();
+        int markerIdx = elementToAnalyze.markerIdx();
 
-        if (!elementoAnalizar.marcadorAlFinal()) {
-            Expression produccionSiguienteMarcador = elementoAnalizar.getProduction().get(indiceMarcador + 1);
+        if (!elementToAnalyze.markerAtEnd()) {
+            Expression nextMarkerProduction = elementToAnalyze.getProduction().get(markerIdx + 1);
 
-            if (produccionSiguienteMarcador.terminal) {
-                return devolver;
+            if (nextMarkerProduction.terminal) {
+                return returnElements;
             } else {
-                String identificador = produccionSiguienteMarcador.expression;
+                String identifier = nextMarkerProduction.expression;
 
                 for (Rule reg : grammar.rules) {
-                    if (reg.identifier.equals(identificador)) {
-                        List<Expression> produccionNuevoElemento = new ArrayList<>(reg.production);
-                        GrammarElement nuevoElemento = new GrammarElement(reg.identifier, produccionNuevoElemento, false);
-                        devolver.add(nuevoElemento);
+                    if (reg.identifier.equals(identifier)) {
+                        List<Expression> newElementProduction = new ArrayList<>(reg.production);
+                        GrammarElement newElement = new GrammarElement(reg.identifier, newElementProduction, false);
+                        returnElements.add(newElement);
                     }
                 }
             }
         }
 
-        return devolver;
+        return returnElements;
     }
 
-    public List<Transition> transicionesPosiblesEnUnEstado(State state) {
-        List<Transition> transicionesNuevas = new ArrayList<>();
+    public List<Transition> possibleTransitionsInState(State state) {
+        List<Transition> newTransitions = new ArrayList<>();
 
         for (GrammarElement grammarElement : state.getElements()) {
-            Transition transicionAuxiliar = new Transition();
+            Transition auxTransition = new Transition();
 
-            if (grammarElement.marcadorAlFinal()) {
-                transicionAuxiliar.addReduce();
-                transicionAuxiliar.setDestination(numeroReglaAPartirElemento(grammarElement));
+            if (grammarElement.markerAtEnd()) {
+                auxTransition.addReduce();
+                auxTransition.setDestination(numRuleFromElement(grammarElement));
                 if (grammarElement.getProduction().size() > 1) {
-                    transicionAuxiliar.setSource(new Expression(grammarElement.getProduction().get(grammarElement.getProduction().size() - 2).expression, true));
+                    auxTransition.setSource(new Expression(grammarElement.getProduction().get(grammarElement.getProduction().size() - 2).expression, true));
                 } else {
-                    transicionAuxiliar.setSource(new Expression("lambda", true));
+                    auxTransition.setSource(new Expression("lambda", true));
                 }
-                transicionesNuevas.add(transicionAuxiliar);
+                newTransitions.add(auxTransition);
             } else {
-                Expression origen = new Expression(grammarElement.getProduction().get(grammarElement.indiceMarcador() + 1));
-                transicionAuxiliar.setSource(origen);
-                List<GrammarElement> elementosParaCrearEstado = new ArrayList<>();
+                Expression origen = new Expression(grammarElement.getProduction().get(grammarElement.markerIdx() + 1));
+                auxTransition.setSource(origen);
+                List<GrammarElement> stateElements = new ArrayList<>();
 
-                for (GrammarElement elemento2 : state.getElements()) {
-                    if (elementoTieneTransicionEnEsaExpresion(elemento2, origen)) {
-                        GrammarElement elementoAux = new GrammarElement(elemento2);
+                for (GrammarElement otherElement : state.getElements()) {
+                    if (elementWithTransitionInExpression(otherElement, origen)) {
+                        GrammarElement elementoAux = new GrammarElement(otherElement);
                         elementoAux.adelantaCursor();
-                        elementosParaCrearEstado.add(elementoAux);
+                        stateElements.add(elementoAux);
                     }
                 }
 
-                int destino = creaEstadoAPartirUnElemento(elementosParaCrearEstado);
+                int destino = createStateFromElement(stateElements);
                 if (destino == -1) {
                     System.out.println("Creación del estado fallida");
                 }
 
-                transicionAuxiliar.setDestination(destino);
-                transicionesNuevas.add(transicionAuxiliar);
+                auxTransition.setDestination(destino);
+                newTransitions.add(auxTransition);
             }
         }
 
-        return transicionesNuevas;
+        return newTransitions;
     }
 
-    public boolean elementoTieneTransicionEnEsaExpresion(GrammarElement grammarElement, Expression simbolo) {
-        int indiceMarcador = grammarElement.indiceMarcador();
+    public boolean elementWithTransitionInExpression(GrammarElement grammarElement, Expression symbol) {
+        int markerIdx = grammarElement.markerIdx();
 
-        if (grammarElement.marcadorAlFinal()) {
+        if (grammarElement.markerAtEnd()) {
             return false;
         }
 
-        return grammarElement.getProduction().get(indiceMarcador + 1).expression.equals(simbolo.expression);
+        return grammarElement.getProduction().get(markerIdx + 1).expression.equals(symbol.expression);
     }
 
-    public int numeroReglaAPartirElemento(GrammarElement grammarElement) {
-        List<Expression> produccionRegla = new ArrayList<>(grammarElement.getProduction());
-        produccionRegla.remove(produccionRegla.size() - 1);
-        Rule reglaAux = new Rule(grammarElement.getIdentifier(), produccionRegla);
+    public int numRuleFromElement(GrammarElement grammarElement) {
+        List<Expression> RuleProduction = new ArrayList<>(grammarElement.getProduction());
+        RuleProduction.remove(RuleProduction.size() - 1);
+        Rule reglaAux = new Rule(grammarElement.getIdentifier(), RuleProduction);
         return grammar.numRule(reglaAux);
     }
 }

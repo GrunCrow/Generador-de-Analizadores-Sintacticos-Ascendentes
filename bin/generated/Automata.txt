@@ -1,222 +1,124 @@
 [ELEMENTS:
 Inicio -> . Expr 
 Expr -> . Term 
-Expr -> . Expr <PLUS> Term 
-Expr -> . Expr <MINUS> Term 
+Expr -> . Expr <OR> Term 
 Term -> . Factor 
-Term -> . Term <PROD> Factor 
-Term -> . Term <DIV> Factor 
-Factor -> . <NUM> 
+Term -> . Term <AND> Factor 
+Factor -> . <NOT> Factor 
 Factor -> . <LPAREN> Expr <RPAREN> 
-Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
+Factor -> . <TRUE> 
+Factor -> . <FALSE> 
 TRANSITIONS:
 Expr -> 1
-Term -> 21
-Factor -> 22
-<NUM> -> 6
-<LPAREN> -> 7
-<IDENTIFIER> -> 14
+Term -> 11
+Factor -> 12
+<NOT> -> 6
+<LPAREN> -> 8
+<TRUE> -> 13
+<FALSE> -> 14
 , ELEMENTS:
 Inicio -> Expr . 
-Expr -> Expr . <PLUS> Term 
-Expr -> Expr . <MINUS> Term 
+Expr -> Expr . <OR> Term 
 TRANSITIONS:
 Reduce R -1(Expr)
-<PLUS> -> 2
-<MINUS> -> 10
+<OR> -> 2
 , ELEMENTS:
-Expr -> Expr <PLUS> . Term 
+Expr -> Expr <OR> . Term 
 Term -> . Factor 
-Term -> . Term <PROD> Factor 
-Term -> . Term <DIV> Factor 
-Factor -> . <NUM> 
+Term -> . Term <AND> Factor 
+Factor -> . <NOT> Factor 
 Factor -> . <LPAREN> Expr <RPAREN> 
-Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
+Factor -> . <TRUE> 
+Factor -> . <FALSE> 
 TRANSITIONS:
 Term -> 3
-Factor -> 22
-<NUM> -> 6
-<LPAREN> -> 7
-<IDENTIFIER> -> 14
+Factor -> 12
+<NOT> -> 6
+<LPAREN> -> 8
+<TRUE> -> 13
+<FALSE> -> 14
 , ELEMENTS:
-Expr -> Expr <PLUS> Term . 
-Term -> Term . <PROD> Factor 
-Term -> Term . <DIV> Factor 
+Expr -> Expr <OR> Term . 
+Term -> Term . <AND> Factor 
 TRANSITIONS:
 Reduce R 1(Term)
-<PROD> -> 4
-<DIV> -> 12
+<AND> -> 4
 , ELEMENTS:
-Term -> Term <PROD> . Factor 
-Factor -> . <NUM> 
+Term -> Term <AND> . Factor 
+Factor -> . <NOT> Factor 
 Factor -> . <LPAREN> Expr <RPAREN> 
-Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
+Factor -> . <TRUE> 
+Factor -> . <FALSE> 
 TRANSITIONS:
 Factor -> 5
-<NUM> -> 6
-<LPAREN> -> 7
-<IDENTIFIER> -> 14
+<NOT> -> 6
+<LPAREN> -> 8
+<TRUE> -> 13
+<FALSE> -> 14
 , ELEMENTS:
-Term -> Term <PROD> Factor . 
-TRANSITIONS:
-Reduce R 4(Factor)
-, ELEMENTS:
-Factor -> <NUM> . 
-TRANSITIONS:
-Reduce R 6(<NUM>)
-, ELEMENTS:
-Factor -> <LPAREN> . Expr <RPAREN> 
-Expr -> . Term 
-Expr -> . Expr <PLUS> Term 
-Expr -> . Expr <MINUS> Term 
-Term -> . Factor 
-Term -> . Term <PROD> Factor 
-Term -> . Term <DIV> Factor 
-Factor -> . <NUM> 
-Factor -> . <LPAREN> Expr <RPAREN> 
-Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
-TRANSITIONS:
-Expr -> 8
-Term -> 21
-Factor -> 22
-<NUM> -> 6
-<LPAREN> -> 7
-<IDENTIFIER> -> 14
-, ELEMENTS:
-Factor -> <LPAREN> Expr . <RPAREN> 
-Expr -> Expr . <PLUS> Term 
-Expr -> Expr . <MINUS> Term 
-TRANSITIONS:
-<RPAREN> -> 9
-<PLUS> -> 2
-<MINUS> -> 10
-, ELEMENTS:
-Factor -> <LPAREN> Expr <RPAREN> . 
-TRANSITIONS:
-Reduce R 7(<RPAREN>)
-, ELEMENTS:
-Expr -> Expr <MINUS> . Term 
-Term -> . Factor 
-Term -> . Term <PROD> Factor 
-Term -> . Term <DIV> Factor 
-Factor -> . <NUM> 
-Factor -> . <LPAREN> Expr <RPAREN> 
-Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
-TRANSITIONS:
-Term -> 11
-Factor -> 22
-<NUM> -> 6
-<LPAREN> -> 7
-<IDENTIFIER> -> 14
-, ELEMENTS:
-Expr -> Expr <MINUS> Term . 
-Term -> Term . <PROD> Factor 
-Term -> Term . <DIV> Factor 
-TRANSITIONS:
-Reduce R 2(Term)
-<PROD> -> 4
-<DIV> -> 12
-, ELEMENTS:
-Term -> Term <DIV> . Factor 
-Factor -> . <NUM> 
-Factor -> . <LPAREN> Expr <RPAREN> 
-Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
-TRANSITIONS:
-Factor -> 13
-<NUM> -> 6
-<LPAREN> -> 7
-<IDENTIFIER> -> 14
-, ELEMENTS:
-Term -> Term <DIV> Factor . 
-TRANSITIONS:
-Reduce R 5(Factor)
-, ELEMENTS:
-Factor -> <IDENTIFIER> . <LPAREN> Args <RPAREN> 
-TRANSITIONS:
-<LPAREN> -> 15
-, ELEMENTS:
-Factor -> <IDENTIFIER> <LPAREN> . Args <RPAREN> 
-Args -> . ArgumentList 
-Args -> . 
-ArgumentList -> . Expr 
-ArgumentList -> . ArgumentList <COMMA> Expr 
-Expr -> . Term 
-Expr -> . Expr <PLUS> Term 
-Expr -> . Expr <MINUS> Term 
-Term -> . Factor 
-Term -> . Term <PROD> Factor 
-Term -> . Term <DIV> Factor 
-Factor -> . <NUM> 
-Factor -> . <LPAREN> Expr <RPAREN> 
-Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
-TRANSITIONS:
-Args -> 16
-ArgumentList -> 18
-Reduce R 10(lambda)
-Expr -> 23
-Term -> 21
-Factor -> 22
-<NUM> -> 6
-<LPAREN> -> 7
-<IDENTIFIER> -> 14
-, ELEMENTS:
-Factor -> <IDENTIFIER> <LPAREN> Args . <RPAREN> 
-TRANSITIONS:
-<RPAREN> -> 17
-, ELEMENTS:
-Factor -> <IDENTIFIER> <LPAREN> Args <RPAREN> . 
-TRANSITIONS:
-Reduce R 8(<RPAREN>)
-, ELEMENTS:
-Args -> ArgumentList . 
-ArgumentList -> ArgumentList . <COMMA> Expr 
-TRANSITIONS:
-Reduce R 9(ArgumentList)
-<COMMA> -> 19
-, ELEMENTS:
-ArgumentList -> ArgumentList <COMMA> . Expr 
-Expr -> . Term 
-Expr -> . Expr <PLUS> Term 
-Expr -> . Expr <MINUS> Term 
-Term -> . Factor 
-Term -> . Term <PROD> Factor 
-Term -> . Term <DIV> Factor 
-Factor -> . <NUM> 
-Factor -> . <LPAREN> Expr <RPAREN> 
-Factor -> . <IDENTIFIER> <LPAREN> Args <RPAREN> 
-TRANSITIONS:
-Expr -> 20
-Term -> 21
-Factor -> 22
-<NUM> -> 6
-<LPAREN> -> 7
-<IDENTIFIER> -> 14
-, ELEMENTS:
-ArgumentList -> ArgumentList <COMMA> Expr . 
-Expr -> Expr . <PLUS> Term 
-Expr -> Expr . <MINUS> Term 
-TRANSITIONS:
-Reduce R 12(Expr)
-<PLUS> -> 2
-<MINUS> -> 10
-, ELEMENTS:
-Expr -> Term . 
-Term -> Term . <PROD> Factor 
-Term -> Term . <DIV> Factor 
-TRANSITIONS:
-Reduce R 0(Term)
-<PROD> -> 4
-<DIV> -> 12
-, ELEMENTS:
-Term -> Factor . 
+Term -> Term <AND> Factor . 
 TRANSITIONS:
 Reduce R 3(Factor)
 , ELEMENTS:
-ArgumentList -> Expr . 
-Expr -> Expr . <PLUS> Term 
-Expr -> Expr . <MINUS> Term 
+Factor -> <NOT> . Factor 
+Factor -> . <NOT> Factor 
+Factor -> . <LPAREN> Expr <RPAREN> 
+Factor -> . <TRUE> 
+Factor -> . <FALSE> 
 TRANSITIONS:
-Reduce R 11(Expr)
-<PLUS> -> 2
-<MINUS> -> 10
+Factor -> 7
+<NOT> -> 6
+<LPAREN> -> 8
+<TRUE> -> 13
+<FALSE> -> 14
+, ELEMENTS:
+Factor -> <NOT> Factor . 
+TRANSITIONS:
+Reduce R 4(Factor)
+, ELEMENTS:
+Factor -> <LPAREN> . Expr <RPAREN> 
+Expr -> . Term 
+Expr -> . Expr <OR> Term 
+Term -> . Factor 
+Term -> . Term <AND> Factor 
+Factor -> . <NOT> Factor 
+Factor -> . <LPAREN> Expr <RPAREN> 
+Factor -> . <TRUE> 
+Factor -> . <FALSE> 
+TRANSITIONS:
+Expr -> 9
+Term -> 11
+Factor -> 12
+<NOT> -> 6
+<LPAREN> -> 8
+<TRUE> -> 13
+<FALSE> -> 14
+, ELEMENTS:
+Factor -> <LPAREN> Expr . <RPAREN> 
+Expr -> Expr . <OR> Term 
+TRANSITIONS:
+<RPAREN> -> 10
+<OR> -> 2
+, ELEMENTS:
+Factor -> <LPAREN> Expr <RPAREN> . 
+TRANSITIONS:
+Reduce R 5(<RPAREN>)
+, ELEMENTS:
+Expr -> Term . 
+Term -> Term . <AND> Factor 
+TRANSITIONS:
+Reduce R 0(Term)
+<AND> -> 4
+, ELEMENTS:
+Term -> Factor . 
+TRANSITIONS:
+Reduce R 2(Factor)
+, ELEMENTS:
+Factor -> <TRUE> . 
+TRANSITIONS:
+Reduce R 6(<TRUE>)
+, ELEMENTS:
+Factor -> <FALSE> . 
+TRANSITIONS:
+Reduce R 7(<FALSE>)
 ]

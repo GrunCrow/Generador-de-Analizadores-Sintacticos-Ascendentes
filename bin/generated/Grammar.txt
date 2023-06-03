@@ -1,27 +1,26 @@
+==================================================================================
+									GRAMATICA
+==================================================================================
 Expr ->[Term ]
-Expr ->[Expr , <PLUS> , Term ]
-Expr ->[Expr , <MINUS> , Term ]
+Expr ->[Expr , <OR> , Term ]
 Term ->[Factor ]
-Term ->[Term , <PROD> , Factor ]
-Term ->[Term , <DIV> , Factor ]
-Factor ->[<NUM> ]
+Term ->[Term , <AND> , Factor ]
+Factor ->[<NOT> , Factor ]
 Factor ->[<LPAREN> , Expr , <RPAREN> ]
-Factor ->[<IDENTIFIER> , <LPAREN> , Args , <RPAREN> ]
-Args ->[ArgumentList ]
-Args ->[lambda ]
-ArgumentList ->[Expr ]
-ArgumentList ->[ArgumentList , <COMMA> , Expr ]
+Factor ->[<TRUE> ]
+Factor ->[<FALSE> ]
 
-CONJUNTO PRIMEROS
-Expr ->[Term ]PRIMEROS([<NUM>, <LPAREN>, <IDENTIFIER>])
-Term ->[Factor ]PRIMEROS([<NUM>, <LPAREN>, <IDENTIFIER>])
-Factor ->[<NUM> ]PRIMEROS([<NUM>, <LPAREN>, <IDENTIFIER>])
-Args ->[ArgumentList ]PRIMEROS([<NUM>, <LPAREN>, <IDENTIFIER>, lambda])
-ArgumentList ->[Expr ]PRIMEROS([<NUM>, <LPAREN>, <IDENTIFIER>])
+==================================================================================
+									FIRSTS
+==================================================================================
+Expr ->[Term ]FIRSTS([<NOT>, <LPAREN>, <TRUE>, <FALSE>])
+Term ->[Factor ]FIRSTS([<NOT>, <LPAREN>, <TRUE>, <FALSE>])
+Factor ->[<NOT> , Factor ]FIRSTS([<NOT>, <LPAREN>, <TRUE>, <FALSE>])
 
-CONJUNTO SIGUIENTES
-Expr ->[Term ]SIGUIENTES([<EOF>, <PLUS>, <MINUS>, <RPAREN>, <COMMA>])
-Term ->[Factor ]SIGUIENTES([<EOF>, <PLUS>, <MINUS>, <RPAREN>, <COMMA>, <PROD>, <DIV>])
-Factor ->[<NUM> ]SIGUIENTES([<EOF>, <PLUS>, <MINUS>, <RPAREN>, <COMMA>, <PROD>, <DIV>])
-Args ->[ArgumentList ]SIGUIENTES([<RPAREN>])
-ArgumentList ->[Expr ]SIGUIENTES([<RPAREN>, <COMMA>])
+
+==================================================================================
+									FOLLOWS
+==================================================================================
+Expr ->[Term ]FOLLOWS([<EOF>, <OR>, <RPAREN>])
+Term ->[Factor ]FOLLOWS([<EOF>, <OR>, <RPAREN>, <AND>])
+Factor ->[<NOT> , Factor ]FOLLOWS([<EOF>, <OR>, <RPAREN>, <AND>])

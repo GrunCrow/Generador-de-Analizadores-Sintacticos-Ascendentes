@@ -18,8 +18,8 @@ public class GrammarParser {
         }
     }
 
-    private void consume(int expectedKind) throws ParseException {
-        // si comentario
+    private void match(int expectedKind) throws ParseException {
+        // si es comentario
     	if (currentToken.getKind() == TokenKind.COMENTARIO) {
     		// no hacer nada
     		currentToken = lexer.getNextToken();
@@ -41,26 +41,26 @@ public class GrammarParser {
     }
 
     private void definicion() throws ParseException {
-        consume(TokenKind.NOTERMINAL);
-        consume(TokenKind.EQ);
-        listaReglas();
-        consume(TokenKind.SEMICOLON);
+        match(TokenKind.NOTERMINAL);
+        match(TokenKind.EQ);
+        rulesList();
+        match(TokenKind.SEMICOLON);
     }
 
-    private void listaReglas() throws ParseException {
-        regla();
+    private void rulesList() throws ParseException {
+        rule();
         while (currentToken.getKind() == TokenKind.BAR) {
-            consume(TokenKind.BAR);
-            regla();
+            match(TokenKind.BAR);
+            rule();
         }
     }
 
-    private void regla() throws ParseException {
+    private void rule() throws ParseException {
         while (currentToken.getKind() == TokenKind.NOTERMINAL || currentToken.getKind() == TokenKind.TERMINAL) {
             if (currentToken.getKind() == TokenKind.NOTERMINAL) {
-                consume(TokenKind.NOTERMINAL);
+                match(TokenKind.NOTERMINAL);
             } else {
-                consume(TokenKind.TERMINAL);
+                match(TokenKind.TERMINAL);
             }
         }
     }

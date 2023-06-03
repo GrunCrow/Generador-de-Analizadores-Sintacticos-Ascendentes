@@ -17,85 +17,88 @@ public class Generator {
         automaton = new Automaton(grammar);
     }
 
-    public void generaSalida(String ruta) throws IOException {
-        leerFicheroSalida(ruta);
-        generaTokenConstants();
-        generaSymbolConstants();
+    public void generateOutput(String ruta) throws IOException {
+        readOutputFile(ruta);
+        generateTokenConstants();
+        generateSymbolConstants();
 
         grammar.removeLambda();
-        automaton.creaEstadoCero();
-        generaParser();
-        generaGrammar();
+        automaton.createState0();
+        generateParser();
+        generateGrammar();
     }
 
-    private void leerFicheroSalida(String ruta) throws IOException {
+    private void readOutputFile(String ruta) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(ruta))) {
             boolean terminal = false;
-            boolean agregarExpresion = false;
-            boolean empiezaRegla = true;
-            boolean nuevoIdentificador = true;
-            String identificador = null;
-            String linea;
+            boolean addExpression = false;
+            boolean startRule = true;
+            boolean newIdentifier = true;
+            String identifier = null;
+            String line;
 
-            while ((linea = br.readLine()) != null && linea.length() > 0) {
-                if (empiezaRegla) {
-                    if (nuevoIdentificador) {
-                        identificador = linea;
-                        nuevoIdentificador = false;
-                        agregarExpresion = false;
+            while ((line = br.readLine()) != null && line.length() > 0) {
+                if (startRule) {
+                    if (newIdentifier) {
+                        identifier = line;
+                        newIdentifier = false;
+                        addExpression = false;
                     }
-                    Rule aux = new Rule(identificador);
+                    Rule aux = new Rule(identifier);
                     grammar.addRule(aux);
-                    empiezaRegla = false;
+                    startRule = false;
                 }
 
-                if (!esIrrelevante(linea)) {
-                    if (esToken(linea)) {
-                        String aux = linea.substring(1, linea.length() - 1);
+                if (!irrelevant(line)) {
+                    if (isToken(line)) {
+                        String aux = line.substring(1, line.length() - 1);
                         if (!tokens.contains(aux))
                             tokens.add(aux);
                         terminal = true;
-                    } else if (linea.length() > 1) {
-                        if (!symbols.contains(linea))
-                            symbols.add(linea);
+                    } else if (line.length() > 1) {
+                        if (!symbols.contains(line))
+                            symbols.add(line);
                         terminal = false;
                     }
 
-                    if (agregarExpresion) {
-                        grammar.rules.get(grammar.rules.size() - 1).addExpressions(linea, terminal);
+                    if (addExpression) {
+                        grammar.rules.get(grammar.rules.size() - 1).addExpressions(line, terminal);
                     }
-                    agregarExpresion = true;
+                    addExpression = true;
                 } else {
-                    if (linea.equals("|")) {
-                        empiezaRegla = true;
+                    if (line.equals("|")) {
+                        startRule = true;
                     }
-                    if (linea.equals(";")) {
-                        empiezaRegla = true;
-                        nuevoIdentificador = true;
+                    if (line.equals(";")) {
+                        startRule = true;
+                        newIdentifier = true;
                     }
                 }
             }
         }
     }
 
-    private boolean esIrrelevante(String linea) {
-        if (linea.length() > 3)
+    private boolean irrelevant(String line) {
+        if (line.length() > 3)
             return false;
-        if (linea.equals("|") || linea.equals("::=") || linea.equals(";"))
+        if (line.equals("|") || line.equals("::=") || line.equals(";"))
             return true;
         return false;
     }
 
-    private boolean esToken(String linea) {
-        if (!esIrrelevante(linea) && linea.length() > 2) {
-            if (linea.charAt(0) == '<' && linea.charAt(linea.length() - 1) == '>')
+    private boolean isToken(String line) {
+        if (!irrelevant(line) && line.length() > 2) {
+            if (line.charAt(0) == '<' && line.charAt(line.length() - 1) == '>')
                 return true;
         }
         return false;
     }
 
-    private void generaSymbolConstants() {
-        File workingdir = directorioTrabajo();
+    private void generateSymbolConstants() {
+    	
+    	System.out.println("Generando SymbolConstants.java");
+    	
+        File workingdir = workingDir();
 
         try (PrintStream stream = new PrintStream(new FileOutputStream(new File(workingdir, "src/generated/SymbolConstants.java")))) {
             stream.println("package generated;\n");
@@ -108,13 +111,21 @@ public class Generator {
             }
 
             stream.println("\n}");
+            
+            // stream.close();
+            
+            System.out.println("SymbolConstants.java Generado\n\n");
+            
         } catch (Exception ex) {
             printError(workingdir, ex);
         }
     }
 
-	private void generaTokenConstants() {
-		File workingdir = directorioTrabajo();
+	private void generateTokenConstants() {
+		
+		System.out.println("Generando TokenConstants.java");
+		
+		File workingdir = workingDir();
 
 		try {
 			FileOutputStream outputfile = new FileOutputStream(new File(workingdir, "src/generated/TokenConstants.java"));
@@ -122,10 +133,14 @@ public class Generator {
 			
 			// package
 			stream.println("package generated;\n");
-
+			
+			// Declarar clase
 			stream.println("public interface TokenConstants {\n");
+			// Incluir siempre al inicio el Token EOF = 0
 			stream.println("\t public int EOF = 0;");
+			// Al empezar con EOF = 0, iniciar int de tokens a 1
 			int i = 1;
+			// Añadir cada token
 			for (String token : tokens) {
 				stream.println("\t public int " + token + " = " + i + ";");
 				i++;
@@ -133,6 +148,9 @@ public class Generator {
 			stream.println("\n}");
 
 			stream.close();
+			
+			System.out.println("TokenConstants.java Generado\n\n");
+			
 		} catch (Error err) {
 			printError(workingdir, err);
 		} catch (Exception ex) {
@@ -141,8 +159,11 @@ public class Generator {
 
 	}
 
-	public void generaParser() {
-		File workingdir = directorioTrabajo();
+	public void generateParser() {
+		
+		System.out.println("Generando Parser.java");
+		
+		File workingdir = workingDir();
 
 		try {
 			FileOutputStream outputfile = new FileOutputStream(new File(workingdir, "src/generated/Parser.java"));
@@ -155,12 +176,12 @@ public class Generator {
 			stream.println("import auxiliares.ActionElement;");
 			stream.println("import auxiliares.SLRParser;\n\n");
 			
-			//Emepzamos con Parser() y lo cerramos
+			// Declarar clase
 			stream.println("public class Parser extends SLRParser implements TokenConstants, SymbolConstants {\n\n "
 					+ "\tpublic Parser() {\r\n\t\tinitRules();\r\n\t\tinitActionTable();\r\n\t\tinitGotoTable();\r\n\t}\n");
 
 			
-			// Emepzamos con initRules
+			// Declarar InitRules
 			stream.println("\t"
 					+ "private void initRules() {\n\t\t"
 					+ "int[][] initRule = {\n" 
@@ -171,36 +192,39 @@ public class Generator {
 				stream.println("\t\t\t\t{ " + reg.identifier + ", " + reg.production.size() + " },");
 			}
 			
-			//Cerrar InitRule
+			// Cerrar InitRule
 			stream.println("\t\t};\n\n\t\t"
 					+ "this.rule = initRule;\n\t}\n");
 
-			// Empezamos con ActionTable
+			// ActionTable
 			stream.println("\tprivate void initActionTable(){");
-				//Tamano de la tabla ActionTable
+				//	Declarar ActionTable (size)
 			stream.println("\t\tactionTable = new ActionElement["+ automaton.getStates().size() +"]["+ tokens.size() +"];");
-				//Bucle que agrega a la tabla la informacion cuando es necesaria segund los estados.
+				// Información ActionTable a generar
 			for (int i=0; i< automaton.getStates().size() ; i++) {
-				stream.print(sacaInformacionActionTable(automaton.getStates().get(i), i));
+				stream.print(generateActionTable(automaton.getStates().get(i), i));
 			}
-			//Cerramos ActionTable
+			// Cerrar ActionTable
 			stream.println("\t}\n");
 			
-			// todo esta tabla podrá tener los enteros diferentes ya que depende de la implementación, pero el resto de valores deben ser iguales (depende de los estados del autom)
-			// Empezar con GotoTable()
+			// TODO esta tabla podrá tener los enteros diferentes ya que depende de la implementación, pero el resto de valores deben ser iguales (depende de los estados del autom)
+			// GotoTable()
 			stream.println("\tprivate void initGotoTable() {");
-				// Tamano de la tabla con los valors de symbols y estados.
+				// Declarar GotoTable (size)
 			stream.println("\t\tgotoTable = new int[" + automaton.getStates().size() + "][" + symbols.size() + "];");
-				// Bucle que agrega informacion cuando es necesaria segun el estado
+				// Información GotoTable a generar
 			for (int i=0; i< automaton.getStates().size() ; i++) {
-				stream.print(sacaInformacionGoToEstado(automaton.getStates().get(i), i ));
+				stream.print(generateGotoTable(automaton.getStates().get(i), i ));
 			}
-			//Cerramos GoToTable
+			// Cerrar GoToTable
 			stream.println("\t}\n");
 
-			// Cerramos la clase
+			// Cerrar clase
 			stream.println("}");
 			stream.close();
+			
+			System.out.println("Parser.java Generado\n\n");
+			
 		} catch (Error err) {
 			printError(workingdir, err);
 		} catch (Exception ex) {
@@ -210,30 +234,43 @@ public class Generator {
 	}
 	
 	
-	private void generaGrammar() {
-		File workingdir = directorioTrabajo();
+	private void generateGrammar() {
+		File workingdir = workingDir();
 
 		try {
 			FileOutputStream outputfile = new FileOutputStream(new File(workingdir, "src/generated/Grammar.txt"));
 			PrintStream stream = new PrintStream(outputfile);
 			
+			// Gramatica
 			Grammar gramaticaConLambda = grammar;
 			gramaticaConLambda.addLambda();
 			
+			stream.println("==================================================================================");
+			stream.println("\t\t\t\t\t\t\t\t\tGRAMATICA");
+			stream.println("==================================================================================");
 			stream.println(gramaticaConLambda.toString());
-			stream.println("CONJUNTO PRIMEROS");
+			
+			// Firsts
+			stream.println("==================================================================================");
+			stream.println("\t\t\t\t\t\t\t\t\tFIRSTS");
+			stream.println("==================================================================================");
 			String identificador = "";
 			for (Rule reg : gramaticaConLambda.rules) {
 				if(!identificador.equals(reg.identifier)) {
-					stream.println(reg.toString() + "PRIMEROS(" + reg.firsts.toString() + ")");
+					stream.println(reg.toString() + "FIRSTS(" + reg.firsts.toString() + ")");
 					identificador = reg.identifier;
 				}
 			}
 			
-			stream.println("\nCONJUNTO SIGUIENTES");
+			stream.println("\n");
+			
+			// Follows
+			stream.println("==================================================================================");
+			stream.println("\t\t\t\t\t\t\t\t\tFOLLOWS");
+			stream.println("==================================================================================");
 			for (Rule reg : gramaticaConLambda.rules) {
 				if(!identificador.equals(reg.identifier)) {
-					stream.println(reg.toString() + "SIGUIENTES(" + reg.follows.toString() + ")");
+					stream.println(reg.toString() + "FOLLOWS(" + reg.follows.toString() + ")");
 					identificador = reg.identifier;
 				}
 			}
@@ -247,28 +284,30 @@ public class Generator {
 	}
 	
 
-	private String sacaInformacionActionTable(State state, int numEstado) {
+	private String generateActionTable(State state, int numEstado) {
 		String devolver = "";
 		ArrayList<Transition> transicionesEstado = state.getTransiciones();
 
 		for(Transition transition : transicionesEstado) {
 			if(transition.getSource().terminal) {
-				if(transition.isReduce()) {//Si es reduccion o desplazamiento...
-					devolver += generaReduccionActionTable(transition, numEstado);
-				}else {//Es desplazamiento
+				// Reduccion
+				if(transition.isReduce()) {
+					devolver += generateReduceActionTable(transition, numEstado);
+				// Desplazamiento
+				}else {
 					devolver += "\n\t\tactionTable["+ numEstado +"]["+ eliminaCuadrilla(transition.getSource().expression) +"] = new ActionElement(ActionElement.SHIFT, "+ transition.getDestination() +");";	
 				}				
 			}
 		}
 		
 		
-//		if(!devolver.isEmpty())
-//			devolver += "\n";
+		if(!devolver.isEmpty())
+			devolver += "\n";
 		
 		return devolver;
 	}
 	
-	private String generaReduccionActionTable(Transition transition, int numEstado) {
+	private String generateReduceActionTable(Transition transition, int numEstado) {
 		String devolver = "";
 		
 		if(transition.getDestination() == -1) {
@@ -286,7 +325,7 @@ public class Generator {
 		return terminal.substring(1, terminal.length()-1);
 	}
 	
-	private String sacaInformacionGoToEstado(State state, int numEstado) {
+	private String generateGotoTable(State state, int numEstado) {
 		String devolver = "";
 		ArrayList<Transition> transicionesEstado = state.getTransiciones();
 		
@@ -296,13 +335,13 @@ public class Generator {
 			}
 		}
 		
-//		if(!devolver.isEmpty())
-//			devolver += "\n";
+		if(!devolver.isEmpty())
+			devolver += "\n";
 		
 		return devolver;
 	}
 
-	private File directorioTrabajo() {
+	private File workingDir() {
 	    String currentPath = System.getProperty("user.dir");
 	    return new File(currentPath);
 	}

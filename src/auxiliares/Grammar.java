@@ -23,12 +23,12 @@ public class Grammar {
 	private void calcularFirsts() {
 		for (Rule reg : rules) {
 			Expression analizar = reg.production.get(0);
-			calculaFirstsRegla(reg, analizar);
+			calculaFirstsRule(reg, analizar);
 		}
 		unificarFirsts();
 	}
 
-	private void calculaFirstsRegla(Rule rule, Expression expression) {
+	private void calculaFirstsRule(Rule rule, Expression expression) {
 
 		if (expression.isTerminal()) {
 			rule.addFirsts(expression.expression);
@@ -41,7 +41,7 @@ public class Grammar {
 																		// las
 					Expression aux = regs.production.get(0); // terminales que correspondan
 					if (!aux.expression.equals(expression.expression)) // Evitar recursividad infinita
-						calculaFirstsRegla(rule, aux);
+						calculaFirstsRule(rule, aux);
 				}
 			}
 		}

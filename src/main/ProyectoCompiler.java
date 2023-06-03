@@ -7,9 +7,9 @@ import auxiliares.*;
 public class ProyectoCompiler {
     public static void main(String[] args) {
         // Rutas de los archivos de entrada y salida
-        String mainname = "Main.txt";
+        String mainname = "Main2.txt";
         String rutaSalidaLexer = "src/generated/Lexer.txt";
-        String rutaSalida = "src/generated/Salida.txt";
+        boolean salidaCorrecta = false;
         String rutaSalidaErrores = "src/generated/ProyectoErrors.txt";
 
         File mainfile = new File(mainname);
@@ -18,7 +18,7 @@ public class ProyectoCompiler {
             // Generar archivo de tokens
             FileOutputStream outputfile = new FileOutputStream(new File(rutaSalidaLexer));
             PrintStream stream = new PrintStream(outputfile);
-
+            
             GrammarLexer lexer = new GrammarLexer(mainfile);
             Token tk;
             do {
@@ -36,39 +36,24 @@ public class ProyectoCompiler {
         try {
             GrammarParser parser = new GrammarParser(mainname);
             parser.parse();
-            printOutput(rutaSalida, "Correcto");
+            salidaCorrecta = true;
         } catch (Error err) {
             printError(rutaSalidaErrores, err);
-            printOutput(rutaSalida, "Incorrecto");
+            salidaCorrecta = false;
         } catch (Exception ex) {
             printError(rutaSalidaErrores, ex);
-            printOutput(rutaSalida, "Incorrecto");
+            salidaCorrecta = false;
         }
 
         try {
-            // Generar salida si el análisis fue correcto
-            if (salidaCorrecta(rutaSalida)) {
+            // Generar todos los archivos necesarios (SymbolConstants, TokenConstants y Parser)
+            if (salidaCorrecta) {
                 Generator aux = new Generator();
-                aux.generaSalida(rutaSalidaLexer);
+                aux.generateOutput(rutaSalidaLexer);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private static boolean salidaCorrecta(String ruta) throws IOException {
-        String linea;
-        FileReader f;
-        f = new FileReader(ruta);
-        BufferedReader b = new BufferedReader(f);
-        if ((linea = b.readLine()) != null) {
-            if (linea.equals("Correcto")) {
-                b.close();
-                return true;
-            }
-        }
-        b.close();
-        return false;
     }
 
     private static void printError(String rutaSalidaErrores, Throwable e) {
@@ -80,17 +65,6 @@ public class ProyectoCompiler {
             errorStream.close();
         } catch (Exception ex) {
             // Manejo de errores en caso de fallo al imprimir el error
-        }
-    }
-
-    private static void printOutput(String rutaSalida, String msg) {
-        try {
-            FileOutputStream outputfile = new FileOutputStream(new File(rutaSalida));
-            PrintStream stream = new PrintStream(outputfile);
-            stream.println(msg);
-            stream.close();
-        } catch (Exception ex) {
-            // Manejo de errores en caso de fallo al imprimir la salida
         }
     }
 }
