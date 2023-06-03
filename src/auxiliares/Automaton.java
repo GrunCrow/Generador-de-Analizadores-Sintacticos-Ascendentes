@@ -147,7 +147,7 @@ public class Automaton {
 
             if (grammarElement.marcadorAlFinal()) {
                 transicionAuxiliar.addReduce();
-                transicionAuxiliar.anadirDestino(numeroReglaAPartirElemento(grammarElement));
+                transicionAuxiliar.setDestination(numeroReglaAPartirElemento(grammarElement));
                 if (grammarElement.getProduction().size() > 1) {
                     transicionAuxiliar.setSource(new Expression(grammarElement.getProduction().get(grammarElement.getProduction().size() - 2).expression, true));
                 } else {
@@ -172,7 +172,7 @@ public class Automaton {
                     System.out.println("Creación del estado fallida");
                 }
 
-                transicionAuxiliar.anadirDestino(destino);
+                transicionAuxiliar.setDestination(destino);
                 transicionesNuevas.add(transicionAuxiliar);
             }
         }

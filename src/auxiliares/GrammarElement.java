@@ -87,7 +87,6 @@ public class GrammarElement {
 		}
 		return true;
 	}
-
 	
 	
 	public String toString() {

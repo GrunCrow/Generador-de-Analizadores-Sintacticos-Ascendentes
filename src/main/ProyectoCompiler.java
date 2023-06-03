@@ -19,7 +19,6 @@ public class ProyectoCompiler {
             FileOutputStream outputfile = new FileOutputStream(new File(rutaSalidaLexer));
             PrintStream stream = new PrintStream(outputfile);
 
-            FileInputStream fis = new FileInputStream(mainfile);
             GrammarLexer lexer = new GrammarLexer(mainfile);
             Token tk;
             do {
@@ -35,8 +34,6 @@ public class ProyectoCompiler {
         }
 
         try {
-            // Realizar análisis sintáctico
-            FileInputStream fis = new FileInputStream(mainfile);
             GrammarParser parser = new GrammarParser(mainname);
             parser.parse();
             printOutput(rutaSalida, "Correcto");

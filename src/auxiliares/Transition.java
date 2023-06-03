@@ -24,7 +24,7 @@ public class Transition {
 		return this.source;
 	}
 	
-	public void anadirDestino(int destination) {
+	public void setDestination(int destination) {
 		this.destination = destination;
 	}
 	

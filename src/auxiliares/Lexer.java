@@ -3,7 +3,7 @@ package auxiliares;
 import java.io.*;
 
 /**
- * Clase que desarrolla el funcionamiento de una M�quina Discriminadora
+ * Clase que desarrolla el funcionamiento de una Maquina Discriminadora
  * Determinista
  */
 public abstract class Lexer {
@@ -14,7 +14,7 @@ public abstract class Lexer {
 	private BufferedCharStream stream;
 	
 	/**
-	 * Transiciones del aut�mata de la m�quina
+	 * Transiciones del automata de la maquina
 	 * 
 	 * @param state Estado inicial
 	 * @param symbol S�mbolo del alfabeto

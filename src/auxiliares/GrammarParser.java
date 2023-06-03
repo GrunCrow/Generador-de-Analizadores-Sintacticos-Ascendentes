@@ -77,23 +77,4 @@ public class GrammarParser {
             System.err.println("Error de análisis sintáctico: " + e.getMessage());
         }
     }
-
-    /*public static void main(String[] args) {
-        GrammarParser parser = new GrammarParser();
-
-        try {
-            File file = new File("Main.txt");
-            boolean result = parser.parse(file);
-
-            if (result) {
-                System.out.println("Análisis sintáctico exitoso. La gramática es válida.");
-            } else {
-                System.out.println("Análisis sintáctico fallido. La gramática no es válida.");
-            }
-        } catch (IOException e) {
-            System.out.println("Error al leer el archivo: " + e.getMessage());
-        } catch (SintaxException e) {
-            System.out.println("Error de sintaxis en el archivo: " + e.getMessage());
-        }
-    }*/
 }

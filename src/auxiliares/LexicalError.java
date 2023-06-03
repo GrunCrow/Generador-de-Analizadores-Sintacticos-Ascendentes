@@ -3,7 +3,6 @@ package auxiliares;
 /**
  * Clase que describe un error l�xico
  * 
- * @author Francisco Jos� Moreno Velo
  */
 public class LexicalError extends Error {
 
