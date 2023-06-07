@@ -2,25 +2,34 @@
 									GRAMATICA
 ==================================================================================
 Expr ->[Term ]
-Expr ->[Expr , <OR> , Term ]
+Expr ->[Expr , <PLUS> , Term ]
+Expr ->[Expr , <MINUS> , Term ]
 Term ->[Factor ]
-Term ->[Term , <AND> , Factor ]
-Factor ->[<NOT> , Factor ]
+Term ->[Term , <PROD> , Factor ]
+Term ->[Term , <DIV> , Factor ]
+Factor ->[<NUM> ]
 Factor ->[<LPAREN> , Expr , <RPAREN> ]
-Factor ->[<TRUE> ]
-Factor ->[<FALSE> ]
+Factor ->[<IDENTIFIER> , <LPAREN> , Args , <RPAREN> ]
+Args ->[ArgumentList ]
+Args ->[lambda ]
+ArgumentList ->[Expr ]
+ArgumentList ->[ArgumentList , <COMMA> , Expr ]
 
 ==================================================================================
 									FIRSTS
 ==================================================================================
-Expr ->[Term ]FIRSTS([<NOT>, <LPAREN>, <TRUE>, <FALSE>])
-Term ->[Factor ]FIRSTS([<NOT>, <LPAREN>, <TRUE>, <FALSE>])
-Factor ->[<NOT> , Factor ]FIRSTS([<NOT>, <LPAREN>, <TRUE>, <FALSE>])
+Expr ->[Term ]FIRSTS([<NUM>, <LPAREN>, <IDENTIFIER>])
+Term ->[Factor ]FIRSTS([<NUM>, <LPAREN>, <IDENTIFIER>])
+Factor ->[<NUM> ]FIRSTS([<NUM>, <LPAREN>, <IDENTIFIER>])
+Args ->[ArgumentList ]FIRSTS([<NUM>, <LPAREN>, <IDENTIFIER>, lambda])
+ArgumentList ->[Expr ]FIRSTS([<NUM>, <LPAREN>, <IDENTIFIER>])
 
 
 ==================================================================================
 									FOLLOWS
 ==================================================================================
-Expr ->[Term ]FOLLOWS([<EOF>, <OR>, <RPAREN>])
-Term ->[Factor ]FOLLOWS([<EOF>, <OR>, <RPAREN>, <AND>])
-Factor ->[<NOT> , Factor ]FOLLOWS([<EOF>, <OR>, <RPAREN>, <AND>])
+Expr ->[Term ]FOLLOWS([<EOF>, <PLUS>, <MINUS>, <RPAREN>, <COMMA>])
+Term ->[Factor ]FOLLOWS([<EOF>, <PLUS>, <MINUS>, <RPAREN>, <COMMA>, <PROD>, <DIV>])
+Factor ->[<NUM> ]FOLLOWS([<EOF>, <PLUS>, <MINUS>, <RPAREN>, <COMMA>, <PROD>, <DIV>])
+Args ->[ArgumentList ]FOLLOWS([<RPAREN>])
+ArgumentList ->[Expr ]FOLLOWS([<RPAREN>, <COMMA>])

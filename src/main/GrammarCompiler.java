@@ -4,13 +4,13 @@ import java.io.*;
 
 import auxiliares.*;
 
-public class ProyectoCompiler {
+public class GrammarCompiler {
     public static void main(String[] args) {
         // Rutas de los archivos de entrada y salida
-        String mainname = "Main2.txt";
+        String mainname = "Main.txt";
         String rutaSalidaLexer = "src/generated/Lexer.txt";
         boolean salidaCorrecta = false;
-        String rutaSalidaErrores = "src/generated/ProyectoErrors.txt";
+        String rutaSalidaErrores = "src/generated/GrammarErrors.txt";
 
         File mainfile = new File(mainname);
 
@@ -60,7 +60,7 @@ public class ProyectoCompiler {
         try {
             FileOutputStream errorfile = new FileOutputStream(new File(rutaSalidaErrores));
             PrintStream errorStream = new PrintStream(errorfile);
-            errorStream.println("[File Main.Proyecto] 1 error found:");
+            errorStream.println("[File Main.Grammar] 1 error found:");
             errorStream.println(e.toString());
             errorStream.close();
         } catch (Exception ex) {
